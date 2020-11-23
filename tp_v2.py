@@ -60,18 +60,20 @@ class SandboxMode(Mode):
             mode.app.setActiveMode(mode.app.splashScreenMode)
     
     def redrawAll(mode, canvas):
-        # data1 = {'Macronutrients': ['CARB', 'PROT', 'FATS'],
-        #  'Percentage of Diet': [0.33, 0.67, 1.00]
-        # }
-        # df1 = DataFrame(data1,columns=['Macronutrients','Percentage of Diet'])
+        '''
+        data1 = {'Macronutrients': ['CARB', 'PROT', 'FATS'],
+         'Percentage of Diet': [0.33, 0.67, 1.00]
+        }
+        df1 = DataFrame(data1,columns=['Macronutrients','Percentage of Diet'])
         
-        # figure1 = plt.Figure(figsize=(7,5), dpi=100)
-        # ax1 = figure1.add_subplot(111)
-        # bar1 = FigureCanvasTkAgg(figure1, canvas)
-        # bar1.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH)
-        # df1 = df1[['Macronutrients','Percentage of Diet']].groupby('Macronutrients').sum()
-        # df1.plot(kind='bar', legend=True, ax=ax1)
-        # ax1.set_title('Macronutrients Vs. Percentage of Diet')
+        figure1 = plt.Figure(figsize=(7,5), dpi=100)
+        ax1 = figure1.add_subplot(111)
+        bar1 = FigureCanvasTkAgg(figure1, canvas)
+        bar1.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH)
+        df1 = df1[['Macronutrients','Percentage of Diet']].groupby('Macronutrients').sum()
+        df1.plot(kind='bar', legend=True, ax=ax1)
+        ax1.set_title('Macronutrients Vs. Percentage of Diet')
+        '''
         pass
 
 class Results(SandboxMode):

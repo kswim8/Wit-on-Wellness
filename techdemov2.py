@@ -18,11 +18,18 @@ class MyApp(App):
         self.message = 'Click mouse to enter food'
         self.foodentered = False
         self.foodFullDict = dict() 
+    
+    def getCachedPhotoImage(self, image):
+        # stores a cached version of the PhotoImage in the PIL/Pillow image
+        if ('cachedPhotoImage' not in image.__dict__):
+            image.cachedPhotoImage = ImageTk.PhotoImage(image)
+        return image.cachedPhotoImage
 
     def resizeAndDrawPics(self, canvas):
         if self.foodentered:
             for foodname in self.foodFullDict:
-                canvas.create_image(250, self.foodFullDict[foodname][2], image=ImageTk.PhotoImage(self.loadImage(self.foodFullDict[foodname][1])))
+                cachedImage = self.getCachedPhotoImage(self.loadImage(self.foodFullDict[foodname][1]))
+                canvas.create_image(250, self.foodFullDict[foodname][2], image=cachedImage)
         
     def redrawAll(self, canvas):
         font = 'Arial 24 bold'
@@ -32,9 +39,7 @@ class MyApp(App):
         canvas.create_text(self.width/2,  self.height/2,
                            text=self.message, font=font)
         self.resizeAndDrawPics(canvas)
-        # if self.foodentered:
-        #     for foodname in self.foodFullDict:
-        #         canvas.create_image(250, self.foodFullDict[foodname][2], image=ImageTk.PhotoImage(self.loadImage(self.foodFullDict[foodname][1])))
+
     
     def getFoodDict(self, userinput):
         # CITATION: https://github.com/USDA/USDA-APIs/issues/64
@@ -84,14 +89,14 @@ class MyApp(App):
         # web scrape for the image
         picCy = 50 # embed the locations of where they will be placed using picCy
         for foodname in foodset:
-            imagerequest = requests.get(f'https://www.google.com/search?tbm=isch&q={foodname}%20food%20or%20drink%20square%20image')
+            imagerequest = requests.get(f'https://www.google.com/search?tbm=isch&q={foodname}%20food%20or%20drink')
             soup = bs4.BeautifulSoup(imagerequest.text, 'html.parser')
             firstimage = soup.find_all("img")[1]
             firstimage = str(firstimage)
             srcindex = firstimage.find('http')      # parsing for start of link
             foodimageurl = firstimage[srcindex:-3]  # slicing for url of image   
             self.foodFullDict[foodname] = [self.foodFullDict[foodname], firstimage[srcindex:-3], picCy] # assign value to key
-            picCy += 50    
+            picCy += 75    
 
         print(self.foodFullDict) # final food dict with macros + image url
 
@@ -101,7 +106,7 @@ class MyApp(App):
         if (userinput == None) or len(userinput) == 0:
             pass
         else:
-            self.getFoodDict(userinput)
+            self.getFoodDict(userinput) 
             
     def getHashables(self):
         return (self.x, ) # return a tuple of hashables
