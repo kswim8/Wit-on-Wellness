@@ -1,3 +1,13 @@
+# Keren Huang - Tech Demo, TP0
+
+# Alex's suggestions moving forward:
+#       currently, scipy does too much of the heavy lifting
+#       find some way to go beyond just using this to add complexity
+#       tip: implement my own linear programming system
+#       create ML model --> how good is the diet? find datasets off kaggle
+#       make a recommendation for the user; on top of "you need more ___"
+#       give examples of foods the user could try for more macros for their goal
+
 import module_manager
 module_manager.review()
 import requests, json
@@ -10,15 +20,21 @@ import scipy
 
 from cmu_112_graphics import *
 
+############################################################################
+# USING NUMPY, PANDAS, AND MATPLOTLIB
+
+# check tp_v2.py for demo
+
 class MyApp(App):
     def appStarted(self):
-        url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOoIC-4bny-KdZnre_pDz4nTePwVe7YIDfb1INaIJQSFCfAjCxPY-i2Av68w&amp;s'
-        # self.image1 = self.loadImage(url)
-        # self.image2 = self.scaleImage(self.image1, 2/3)
-        self.message = 'Click mouse to enter food'
+        self.message = 'Click here to enter a food or drink!'
         self.foodentered = False
         self.foodFullDict = dict() 
-    
+
+    ############################################################################
+    # USING PIL:
+
+    # CITATION: https://www.cs.cmu.edu/~112/notes/notes-animations-part3.html#cachingPhotoImages
     def getCachedPhotoImage(self, image):
         # stores a cached version of the PhotoImage in the PIL/Pillow image
         if ('cachedPhotoImage' not in image.__dict__):
@@ -28,19 +44,22 @@ class MyApp(App):
     def resizeAndDrawPics(self, canvas):
         if self.foodentered:
             for foodname in self.foodFullDict:
-                cachedImage = self.getCachedPhotoImage(self.loadImage(self.foodFullDict[foodname][1]))
-                canvas.create_image(250, self.foodFullDict[foodname][2], image=cachedImage)
-        
+                # cache the image
+                resizedImage = self.scaleImage(self.loadImage(self.foodFullDict[foodname][1]), 0.5)
+                cachedResizedImage = self.getCachedPhotoImage(resizedImage)
+                # create the cached image
+                canvas.create_image(250, self.foodFullDict[foodname][2], image=cachedResizedImage)
+
     def redrawAll(self, canvas):
-        font = 'Arial 24 bold'
-        cy = 0
-        # canvas.create_image(200, 300, image=ImageTk.PhotoImage(self.image1))
-        # canvas.create_image(500, 300, image=ImageTk.PhotoImage(self.image2))
-        canvas.create_text(self.width/2,  self.height/2,
-                           text=self.message, font=font)
+        font = 'Arial 14 bold'
+        canvas.create_rectangle(self.width/2, 5, self.width, 50)
+        canvas.create_text(3*self.width/4,  25,
+                            text=self.message, font=font)
         self.resizeAndDrawPics(canvas)
 
-    
+    ############################################################################
+    # USING REQUESTS AND JSON AND BEAUTIFUL SOUP:
+
     def getFoodDict(self, userinput):
         # CITATION: https://github.com/USDA/USDA-APIs/issues/64
         # pulling food data from the API
@@ -101,12 +120,13 @@ class MyApp(App):
         print(self.foodFullDict) # final food dict with macros + image url
 
     def mousePressed(self, event):
-        userinput = self.getUserInput("What did you eat or drink today? ")
- 
-        if (userinput == None) or len(userinput) == 0:
-            pass
-        else:
-            self.getFoodDict(userinput) 
+        if (self.width/2 <= event.x <= self.width) and (0 <= event.y <= 50):
+            userinput = self.getUserInput("What did you eat or drink today? ")
+    
+            if (userinput == None) or len(userinput) == 0:
+                pass
+            else:
+                self.getFoodDict(userinput) 
             
     def getHashables(self):
         return (self.x, ) # return a tuple of hashables
@@ -119,45 +139,43 @@ class MyApp(App):
 
 MyApp(width=700, height=600)
 
-def testNumpy():
-    pass
+############################################################################
+# USING SCIPY AND OPTIMIZE:
 
-def testPIL():
-    pass
+# CITATION: https://towardsdatascience.com/solving-your-first-linear-program-in-python-9e3020a9ad32
+from scipy.optimize import linprog
+import numpy as np
 
-def matplottest():
+# creating a strawberry banana smoothie
 
-    objects = ('Python', 'C++', 'Java', 'Perl', 'Scala', 'Lisp')
-    y_pos = np.arange(len(objects))
-    performance = [10,8,6,4,2,1]
+# Equations to solve
+# variables: s = strawberries, b = bananas, m = milk, y = yogurt
+# s + b + m + y = 75 (all ingredients summed should be 75 g)
+# y - 2m = 0 (yogurt is 2x milk)
+# s + b <= 50 (strawberry + banana is no more than 50 g)
+# s + y <= 30 (strawberry + yogurt is no more than 30 g)
+# s - b + m - y <= 0 (sum of strawberry and milk is no more than sum of banana and yogurt)
 
-    plt.bar(y_pos, performance, align='center', alpha=0.5)
-    plt.xticks(y_pos, objects)
-    plt.ylabel('Usage')
-    plt.title('Programming language usage')
+# X matrix
+var_list = ['Strawberries', 'Bananas', 'Milk', 'Yogurt']
 
-    plt.show()
+# Inequality equations, LHS
+A_ineq = [[1., 1., 0., 0.], [1., 0., 0., 1.], [1., -1., 1., -1.]]
 
-def matplottest2():
-     
-    x = ['Carbohydrates','Proteins','Fats'] 
-    y = [12,16,6]  
+# Inequality equations, RHS
+B_ineq = [50., 30., 0.]
 
-    # x2 = [6,9,11] 
-    # y2 = [6,15,7] 
-    plt.bar(x, y, align = 'center') 
-    # plt.bar(x2, y2, color = 'g', align = 'center') 
-    plt.title('Bar graph') 
-    plt.ylabel('Y axis') 
-    plt.xlabel('X axis')  
+# Equality equations, LHS
+A_eq = [[1., 1., 1., 1.], [0., 0., -2., 1.]]
 
-    plt.show()
+# Equality equations, RHS
+B_eq = [75., 0.]
 
+# Cost function
+c = [0., 0., 1., 1.]  # construct a cost function
 
-# textBoxTest()
-# testFoodAPI()
-testNumpy()
-testPIL()
-# matplottest()
-# matplottest2()
-
+print('WITHOUT BOUNDS')
+# pass these matrices to linprog, use the method 'interior-point'. '_ub' implies 
+# the upper-bound or inequality matrices and '_eq' imply the equality matrices
+res_no_bounds = linprog(c, A_ub=A_ineq, b_ub=B_ineq, A_eq=A_eq, b_eq=B_eq, method='interior-point')
+print(res_no_bounds)

@@ -49,31 +49,64 @@ class SplashScreenMode(Mode):
 
 class SandboxMode(Mode):
     def appStarted(mode):
-        # mode.userAge = getUserInput(age)
-        # mode.userHeight = getUserInput(height)
-        # mode.userWeight = getUserInput(weight)
-        # mode.userLevelOfActivity = getUserInput(levelOfActivity)
+        # mode.showMessage("For results, please answer all the following questions truthfully.")
+        # mode.userGender = mode.getUserInput("What is your biological gender (M/F) ?")
+        # while True:
+        #     if mode.userGender == None or (mode.userGender).upper() != 'M' and (mode.userGender).upper() != 'F':
+        #         mode.userGender = mode.getUserInput("What is your biological gender (M/F) ?")
+        #     else:
+        #         break
+        # mode.userAge = mode.getUserInput("How old are you in years?")
+        # while True:
+        #     if mode.userAge == None or not (mode.userAge).isdigit() or int(mode.userAge) > 120 or int(mode.userAge) < 0:
+        #         mode.userAge = mode.getUserInput("How old are you in years?")
+        #     else:
+        #         mode.userAge = int(mode.userAge)
+        #         break
+        # mode.userHeight = mode.getUserInput("What is your height in centimeters?")
+        # while True:
+        #     if mode.userHeight == None or not (mode.userHeight).isdigit() or int(mode.userHeight) > 300 or int(mode.userHeight) < 0:
+        #         mode.userAge = mode.getUserInput("What is your height in centimeters?")
+        #     else:
+        #         mode.userHeight = int(mode.userHeight)
+        #         break
+        # mode.userWeight = mode.getUserInput("What is your weight in kilograms?")
+        # while True:
+        #     if mode.userWeight == None or not (mode.userWeight).isdigit() or int(mode.userWeight) > 650 or int(mode.userWeight) < 0:
+        #         mode.userAge = mode.getUserInput("What is your weight in kilograms?")
+        #     else:
+        #         mode.userWeight = int(mode.userWeight)
+        #         break
+        # mode.userLevelOfActivity = mode.getUserInput("Rate your level of activity:")
+        # print(mode.userGender,mode.userAge,mode.userHeight, mode.userWeight,mode.userLevelOfActivity)
+        mode.results = False
         pass
 
     def keyPressed(mode, event):
         if (event.key == 'Escape'):
             mode.app.setActiveMode(mode.app.splashScreenMode)
     
+    def mousePressed(mode, event):
+        if (0 <= event.x <= 100) and (0 <= event.y <= 50):
+            mode.results = not mode.results
+    
     def redrawAll(mode, canvas):
-        '''
-        data1 = {'Macronutrients': ['CARB', 'PROT', 'FATS'],
-         'Percentage of Diet': [0.33, 0.67, 1.00]
-        }
-        df1 = DataFrame(data1,columns=['Macronutrients','Percentage of Diet'])
-        
-        figure1 = plt.Figure(figsize=(7,5), dpi=100)
-        ax1 = figure1.add_subplot(111)
-        bar1 = FigureCanvasTkAgg(figure1, canvas)
-        bar1.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH)
-        df1 = df1[['Macronutrients','Percentage of Diet']].groupby('Macronutrients').sum()
-        df1.plot(kind='bar', legend=True, ax=ax1)
-        ax1.set_title('Macronutrients Vs. Percentage of Diet')
-        '''
+        canvas.create_rectangle(0, 0, 100, 50)
+        canvas.create_text(50, 25, text='See Results')
+        if mode.results:
+            data1 = {'Macronutrients': ['CARB', 'PROT', 'FATS'],
+            'Percentage of Diet': [0.33, 0.67, 1.00] # data for bar height
+            }
+            df1 = DataFrame(data1,columns=['Macronutrients','Percentage of Diet'])
+            
+            figure1 = plt.Figure(figsize=(7,4), dpi=100)
+            ax1 = figure1.add_subplot(111)
+            bar1 = FigureCanvasTkAgg(figure1, canvas)
+            bar1.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH)
+            df1 = df1[['Macronutrients','Percentage of Diet']].groupby('Macronutrients').sum()
+            df1.plot(kind='bar', legend=True, ax=ax1)
+            ax1.set_title('Macronutrients Vs. Percentage of Diet')
+
         pass
 
 class Results(SandboxMode):
@@ -95,7 +128,8 @@ class Results(SandboxMode):
         bar1 = FigureCanvasTkAgg(figure1, canvas)
         bar1.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH)
         df1 = df1[['Macronutrients','Percentage of Diet']].groupby('Macronutrients').sum()
-        df1.plot(kind='bar', legend=True, ax=ax1)
+
+        df1.plot(kind='bar', legend=True, ax=ax1, color=['red', 'blue', 'green'])
         ax1.set_title('Macronutrients Vs. Percentage of Diet')
 
 class PuzzleMode(Mode):
