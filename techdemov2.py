@@ -86,6 +86,7 @@ class MyApp(App):
 
                 # prints nutrients
                 nutrients = response.json()['foods'][num]['foodNutrients']
+                print(nutrients)
                 # iterate through nutrient dicts in the nutrients list
                 for nutrientDict in nutrients:
                     # if nutrient Id matches desired num, store to protein/fat/content var
