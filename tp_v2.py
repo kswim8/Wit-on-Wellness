@@ -54,6 +54,7 @@ class SandboxMode(Mode):
         print(mode.userGender, mode.userAge, mode.userHeight, mode.userWeight, mode.userLevelOfActivity, mode.userGoal, mode.userTime)
         mode.calculateTDEE()
         print(mode.userTDEE)
+        ''' # THE FOLLOWING CODE GOES MORE INTO ABOUT THE WEIGHT LOSS AND CALORIE DEFICIT RESTRICTIONS
         mode.caloriesToLosePerDay = 3500 * (mode.userWeight - mode.userGoal) / mode.userTime
         print(mode.caloriesToLosePerDay)
         if mode.caloriesToLosePerDay > 1000:
@@ -61,7 +62,7 @@ class SandboxMode(Mode):
             mode.daysMax = 3500 * (mode.userWeight - mode.userGoal) / 500
             print("Realistically, you should try to lose this weight in", mode.daysMin, "to", mode.daysMax, "days.")
         else:
-            print("You need to eat about", mode.caloriesToLosePerDay, "less calories per day!")
+            print("You need to eat about", mode.caloriesToLosePerDay, "less calories per day!")'''
         mode.userFoodDict = dict()
 
     def takeUserInputData(mode):
@@ -132,17 +133,61 @@ class SandboxMode(Mode):
         if (event.key == 'Escape'):
             mode.app.setActiveMode(mode.app.splashScreenMode)
     
-    def mousePressed(mode, event): 
-        if (0 <= event.x <= 200) and (0 <= event.y <= 50):
-            mode.results = not mode.results
-            mode.app.setActiveMode(mode.app.resultsMode)
-        elif (0 <= event.x <= 200) and (50 < event.y <= 100):
+    def mousePressed(mode, event):      
+        # search food drink
+        if (0 <= event.x <= 200) and (0 <= event.y <= 250):
             userinput = mode.getUserInput("What did you eat or drink today? ")
             if (userinput == None) or len(userinput) == 0:
                 pass
             else:
                 mode.getFoodDict(userinput) 
-        # elif ()
+        # check user list
+        elif ((0 <= event.x <= 200) and (250 < event.y <= 500)) and len(mode.userFoodDict) > 0:
+            mode.app.setActiveMode(mode.app.userList)
+        # results
+        elif (0 <= event.x <= 200) and (500 < event.y <= 750):
+            mode.results = not mode.results
+            mode.app.setActiveMode(mode.app.resultsMode)
+
+        # add to list buttons
+        if (mode.foodentered):
+            mode.foodselected = False
+            if (575 <= event.x <= 650):
+                # CITATION: https://stackoverflow.com/questions/8023306/get-key-by-value-in-dictionary
+                if (45 <= event.y <= 60): # 25
+                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(25)]
+                    mode.foodselected = True
+                elif (120 <= event.y <= 135) and len(mode.foodFullDict) > 1: # 100
+                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(100)]
+                    mode.foodselected = True
+                elif (195 <= event.y <= 210) and len(mode.foodFullDict) > 2: # 175
+                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(175)]
+                    mode.foodselected = True
+                elif (270 <= event.y <= 285) and len(mode.foodFullDict) > 3: # 250
+                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(250)]
+                    mode.foodselected = True
+                elif (345 <= event.y <= 360) and len(mode.foodFullDict) > 4: # 325
+                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(325)]
+                    mode.foodselected = True
+                elif (420 <= event.y <= 435) and len(mode.foodFullDict) > 5: # 400
+                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(400)]
+                    mode.foodselected = True
+                elif (495 <= event.y <= 510) and len(mode.foodFullDict) > 6: # 475
+                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(475)]
+                    mode.foodselected = True
+                elif (570 <= event.y <= 585) and len(mode.foodFullDict) > 7: # 550
+                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(550)]
+                    mode.foodselected = True
+                elif (645 <= event.y <= 660) and len(mode.foodFullDict) > 8: # 625
+                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(625)]
+                    mode.foodselected = True
+                elif (720 <= event.y <= 735) and len(mode.foodFullDict) > 9: # 700
+                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(700)]
+                    mode.foodselected = True
+                if mode.foodselected:
+                    mode.quantity = int(mode.getUserInput("How many servings?"))
+                    mode.userFoodDict[newFoodCoord] = mode.foodFullDict[newFoodCoord] + [mode.quantity] + [(mode.quantity * mode.foodFullDict[newFoodCoord][0][0], mode.quantity * mode.foodFullDict[newFoodCoord][0][1], mode.quantity * mode.foodFullDict[newFoodCoord][0][2])]
+                    print(mode.userFoodDict)
 
     def getCachedPhotoImage(mode, image):
         # stores a cached version of the PhotoImage in the PIL/Pillow image
@@ -163,9 +208,9 @@ class SandboxMode(Mode):
                 canvas.create_text(300, mode.foodFullDict[foodname][2] + 20, text=f'Carbs (g): {mode.foodFullDict[foodname][0][0]}', anchor='w')
                 canvas.create_text(400, mode.foodFullDict[foodname][2] + 20, text=f'Proteins (g): {mode.foodFullDict[foodname][0][1]}', anchor='w')
                 canvas.create_text(500, mode.foodFullDict[foodname][2] + 20, text=f'Fats (g): {mode.foodFullDict[foodname][0][2]}', anchor='w')
-                # separate foods
+                # separate foods with lines
                 canvas.create_line(200, mode.foodFullDict[foodname][2] + 37.5, mode.width, mode.foodFullDict[foodname][2] + 37.5)
-                # add to listbutton
+                # add-to-list button
                 canvas.create_rectangle(575, mode.foodFullDict[foodname][2] + 20, 650, mode.foodFullDict[foodname][2] + 35, fill='cyan')
                 canvas.create_text(612.5, mode.foodFullDict[foodname][2] + 27.5, text='Add to List')
 
@@ -178,10 +223,11 @@ class SandboxMode(Mode):
             r'https://api.nal.usda.gov/fdc/v1/foods/search',
             params = params,
             json = data
-        )        
+        )
 
         mode.foodentered = True
         mode.foodFullDict = dict()
+        mode.foodFullDictCoords = dict()
         # create a set to prevent duplicates from showing up
         num = 0
         foodset = set()
@@ -225,20 +271,37 @@ class SandboxMode(Mode):
             srcindex = firstimage.find('http')      # parsing for start of link
             foodimageurl = firstimage[srcindex:-3]  # slicing for url of image   
             mode.foodFullDict[foodname] = [mode.foodFullDict[foodname], firstimage[srcindex:-3], picCy] # assign value to key
+            mode.foodFullDictCoords[foodname] = picCy
             picCy += 75    
 
         print(mode.foodFullDict) # final food dict with macros + image url
     
     def redrawAll(mode, canvas):
-        canvas.create_line(200, 0, 200, mode.height)
-        canvas.create_rectangle(0, 0, 200, 50, fill='red')
-        canvas.create_text(100, 25, text='See Results', font='Calibri 15 bold')
-        canvas.create_rectangle(0, 50, 200, 100, fill='orange')
-        canvas.create_text(100, 75, text='Enter food/drink!', font='Calibri 15 bold')
-        canvas.create_rectangle(0, 100, 200, 150, fill='yellow')
-        canvas.create_text(100, 125, text='Check Current User List', font='Calibri 15 bold')        
+        canvas.create_line(200, 0, 200, mode.height)     
+        canvas.create_rectangle(0, 0, 200, 250, fill='red')
+        canvas.create_text(100, 125, text='Search Food / Drink', font='Calibri 15 bold')
+        canvas.create_rectangle(0, 250, 200, 500, fill='yellow')
+        canvas.create_text(100, 375, text='Check Current User List', font='Calibri 15 bold')
+        canvas.create_rectangle(0, 500, 200, 750, fill='green')
+        canvas.create_text(100, 625, text='See Results', font='Calibri 15 bold')    
         mode.displayFoods(canvas)
+
+class UserFoodsList(SandboxMode):
+    def appStarted(mode):
         pass
+
+    def keyPressed(mode, event):
+        pass
+
+    def mousePressed(mode, event):
+        pass
+
+    def displayUserFoods(mode, canvas):
+        pass
+
+    def redrawAll(mode, canvas):
+        pass
+
 
 class Results(SandboxMode):
     def appStarted(mode):
@@ -249,20 +312,21 @@ class Results(SandboxMode):
             mode.app.setActiveMode(mode.app.splashScreenMode)
     
     def redrawAll(mode, canvas):
-        if mode.results:
-            data1 = {'Macronutrients': ['CARB', 'PROT', 'FATS'],
-            'Percentage of Diet': [0.25, 0.25, 0.50]
-            }
-            df1 = DataFrame(data1,columns=['Macronutrients','Percentage of Diet'])
+        # if mode.results:
+        #     data1 = {'Macronutrients': ['CARB', 'PROT', 'FATS'],
+        #     'Percentage of Diet': [0.25, 0.25, 0.50]
+        #     }
+        #     df1 = DataFrame(data1,columns=['Macronutrients','Percentage of Diet'])
             
-            figure1 = plt.Figure(figsize=(7,5), dpi=100)
-            ax1 = figure1.add_subplot(111)
-            bar1 = FigureCanvasTkAgg(figure1, canvas)
-            bar1.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH)
-            df1 = df1[['Macronutrients','Percentage of Diet']].groupby('Macronutrients').sum()
+        #     figure1 = plt.Figure(figsize=(7,5), dpi=100)
+        #     ax1 = figure1.add_subplot(111)
+        #     bar1 = FigureCanvasTkAgg(figure1, canvas)
+        #     bar1.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH)
+        #     df1 = df1[['Macronutrients','Percentage of Diet']].groupby('Macronutrients').sum()
 
-            df1.plot(kind='bar', legend=True, ax=ax1, color=['red', 'blue', 'green'])
-            ax1.set_title('Macronutrients Vs. Percentage of Diet')
+        #     df1.plot(kind='bar', legend=True, ax=ax1, color=['red', 'blue', 'green'])
+        #     ax1.set_title('Macronutrients Vs. Percentage of Diet')
+        pass
 
 class PuzzleMode(Mode):
     def appStarted(mode):
@@ -291,48 +355,6 @@ class Credits(Mode):
         if (event.key == 'Escape'):
             mode.app.setActiveMode(mode.app.splashScreenMode)
 
-class GameMode(Mode):
-    def appStarted(mode):
-        mode.score = 0
-        mode.randomizeDot()
-
-    def randomizeDot(mode):
-        mode.x = random.randint(20, mode.width-20)
-        mode.y = random.randint(20, mode.height-20)
-        mode.r = random.randint(10, 20)
-        mode.color = random.choice(['red', 'orange', 'yellow', 'green', 'blue'])
-        mode.dx = random.choice([+1,-1])*random.randint(3,6)
-        mode.dy = random.choice([+1,-1])*random.randint(3,6)
-
-    def moveDot(mode):
-        mode.x += mode.dx
-        if (mode.x < 0) or (mode.x > mode.width): mode.dx = -mode.dx
-        mode.y += mode.dy
-        if (mode.y < 0) or (mode.y > mode.height): mode.dy = -mode.dy
-
-    def timerFired(mode):
-        mode.moveDot()
-
-    def mousePressed(mode, event):
-        d = ((mode.x - event.x)**2 + (mode.y - event.y)**2)**0.5
-        if (d <= mode.r):
-            mode.score += 1
-            mode.randomizeDot()
-        elif (mode.score > 0):
-            mode.score -= 1
-
-    def keyPressed(mode, event):
-        if (event.key == 'h'):
-            mode.app.setActiveMode(mode.app.helpMode)
-
-    def redrawAll(mode, canvas):
-        font = 'Arial 26 bold'
-        canvas.create_text(mode.width/2, 20, text=f'Score: {mode.score}', font=font)
-        canvas.create_text(mode.width/2, 50, text='Click on the dot!', font=font)
-        canvas.create_text(mode.width/2, 80, text='Press h for help screen!', font=font)
-        canvas.create_oval(mode.x-mode.r, mode.y-mode.r, mode.x+mode.r, mode.y+mode.r,
-                           fill=mode.color)
-
 class HelpMode(Mode):
     def appStarted(mode):
         url = 'https://i.pinimg.com/originals/fe/f7/2f/fef72f73f4f961b4ed6f8e4bb093eb1b.jpg'
@@ -354,11 +376,11 @@ class MyModalApp(ModalApp):
     def appStarted(app):
         app.splashScreenMode = SplashScreenMode()
         app.sandboxMode = SandboxMode()
+        app.userList = UserFoodsList()
         app.resultsMode = Results()
         app.puzzleMode = PuzzleMode()
         app.instructions = Instructions()
         app.credits = Credits()
-        # app.gameMode = GameMode()
         # app.helpMode = HelpMode()
         app.setActiveMode(app.splashScreenMode)
         app.timerDelay = 50
