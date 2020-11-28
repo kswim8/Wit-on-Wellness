@@ -50,6 +50,7 @@ class SandboxMode(Mode):
     def appStarted(mode):
         mode.results = False
         mode.foodentered = False
+        mode.userList = False
         mode.takeUserInputData()
         print(mode.userGender, mode.userAge, mode.userHeight, mode.userWeight, mode.userLevelOfActivity, mode.userGoal, mode.userTime)
         mode.calculateTDEE()
@@ -64,6 +65,11 @@ class SandboxMode(Mode):
         else:
             print("You need to eat about", mode.caloriesToLosePerDay, "less calories per day!")'''
         mode.userFoodDict = dict()
+        mode.userfoodcounter = 0
+        mode.totalCarbs = 0
+        mode.totalProtein = 0
+        mode.totalFat = 0
+        mode.totalCalories = 0
 
     def takeUserInputData(mode):
         mode.userGender = mode.getUserInput("What is your biological/current gender (M/F) ?")
@@ -133,61 +139,83 @@ class SandboxMode(Mode):
         if (event.key == 'Escape'):
             mode.app.setActiveMode(mode.app.splashScreenMode)
     
-    def mousePressed(mode, event):      
-        # search food drink
-        if (0 <= event.x <= 200) and (0 <= event.y <= 250):
-            userinput = mode.getUserInput("What did you eat or drink today? ")
-            if (userinput == None) or len(userinput) == 0:
-                pass
-            else:
-                mode.getFoodDict(userinput) 
-        # check user list
-        elif ((0 <= event.x <= 200) and (250 < event.y <= 500)) and len(mode.userFoodDict) > 0:
-            mode.app.setActiveMode(mode.app.userList)
-        # results
-        elif (0 <= event.x <= 200) and (500 < event.y <= 750):
-            mode.results = not mode.results
-            mode.app.setActiveMode(mode.app.resultsMode)
+    def mousePressed(mode, event):
+        if not mode.userList:      
+            # search food drink
+            if (0 <= event.x <= 200) and (0 <= event.y <= 250):
+                userinput = mode.getUserInput("What did you eat or drink today? ")
+                if (userinput == None) or len(userinput) == 0:
+                    pass
+                else:
+                    mode.getFoodDict(userinput) 
+            # check user list
+            elif ((0 <= event.x <= 200) and (250 < event.y <= 500)):
+                mode.userList = True
+            # results
+            elif (0 <= event.x <= 200) and (500 < event.y <= 750):
+                mode.results = not mode.results
+                mode.app.setActiveMode(mode.app.resultsMode)
 
-        # add to list buttons
-        if (mode.foodentered):
-            mode.foodselected = False
-            if (575 <= event.x <= 650):
-                # CITATION: https://stackoverflow.com/questions/8023306/get-key-by-value-in-dictionary
-                if (45 <= event.y <= 60): # 25
-                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(25)]
-                    mode.foodselected = True
-                elif (120 <= event.y <= 135) and len(mode.foodFullDict) > 1: # 100
-                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(100)]
-                    mode.foodselected = True
-                elif (195 <= event.y <= 210) and len(mode.foodFullDict) > 2: # 175
-                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(175)]
-                    mode.foodselected = True
-                elif (270 <= event.y <= 285) and len(mode.foodFullDict) > 3: # 250
-                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(250)]
-                    mode.foodselected = True
-                elif (345 <= event.y <= 360) and len(mode.foodFullDict) > 4: # 325
-                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(325)]
-                    mode.foodselected = True
-                elif (420 <= event.y <= 435) and len(mode.foodFullDict) > 5: # 400
-                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(400)]
-                    mode.foodselected = True
-                elif (495 <= event.y <= 510) and len(mode.foodFullDict) > 6: # 475
-                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(475)]
-                    mode.foodselected = True
-                elif (570 <= event.y <= 585) and len(mode.foodFullDict) > 7: # 550
-                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(550)]
-                    mode.foodselected = True
-                elif (645 <= event.y <= 660) and len(mode.foodFullDict) > 8: # 625
-                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(625)]
-                    mode.foodselected = True
-                elif (720 <= event.y <= 735) and len(mode.foodFullDict) > 9: # 700
-                    newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(700)]
-                    mode.foodselected = True
-                if mode.foodselected:
-                    mode.quantity = int(mode.getUserInput("How many servings?"))
-                    mode.userFoodDict[newFoodCoord] = mode.foodFullDict[newFoodCoord] + [mode.quantity] + [(mode.quantity * mode.foodFullDict[newFoodCoord][0][0], mode.quantity * mode.foodFullDict[newFoodCoord][0][1], mode.quantity * mode.foodFullDict[newFoodCoord][0][2])]
-                    print(mode.userFoodDict)
+            # add to list buttons
+            if (mode.foodentered):
+                mode.foodselected = False
+                if (575 <= event.x <= 650):
+                    # CITATION: https://stackoverflow.com/questions/8023306/get-key-by-value-in-dictionary
+                    if (45 <= event.y <= 60): # 25
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(25)]
+                        mode.foodselected = True
+                    elif (120 <= event.y <= 135) and len(mode.foodFullDict) > 1: # 100
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(100)]
+                        mode.foodselected = True
+                    elif (195 <= event.y <= 210) and len(mode.foodFullDict) > 2: # 175
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(175)]
+                        mode.foodselected = True
+                    elif (270 <= event.y <= 285) and len(mode.foodFullDict) > 3: # 250
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(250)]
+                        mode.foodselected = True
+                    elif (345 <= event.y <= 360) and len(mode.foodFullDict) > 4: # 325
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(325)]
+                        mode.foodselected = True
+                    elif (420 <= event.y <= 435) and len(mode.foodFullDict) > 5: # 400
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(400)]
+                        mode.foodselected = True
+                    elif (495 <= event.y <= 510) and len(mode.foodFullDict) > 6: # 475
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(475)]
+                        mode.foodselected = True
+                    elif (570 <= event.y <= 585) and len(mode.foodFullDict) > 7: # 550
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(550)]
+                        mode.foodselected = True
+                    elif (645 <= event.y <= 660) and len(mode.foodFullDict) > 8: # 625
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(625)]
+                        mode.foodselected = True
+                    elif (720 <= event.y <= 735) and len(mode.foodFullDict) > 9: # 700
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(700)]
+                        mode.foodselected = True
+                    if mode.foodselected:
+                        mode.quantity = mode.getUserInput("How many servings (integer)?")
+                        while True:
+                            if mode.quantity == None or not mode.quantity.isdigit() or int(mode.quantity) > 100 or int(mode.quantity) < 0:
+                                mode.quantity = mode.getUserInput("How many servings (integer)?")
+                            else:
+                                mode.quantity = int(mode.quantity)
+                                break
+                        newCarbs = mode.quantity * mode.foodFullDict[newFoodCoord][0][0]
+                        newProteins =  mode.quantity * mode.foodFullDict[newFoodCoord][0][1]
+                        newFats = mode.quantity * mode.foodFullDict[newFoodCoord][0][2]
+                        mode.userFoodDict[newFoodCoord] = mode.foodFullDict[newFoodCoord] + [mode.quantity] + [(newCarbs, newProteins, newFats)] + [75 + 75 * mode.userfoodcounter]
+                        mode.userfoodcounter += 1
+                        mode.totalCarbs += newCarbs
+                        mode.totalProtein += newProteins
+                        mode.totalFat += newFats
+                        mode.totalCalories = mode.totalCarbs * 4 + mode.totalProtein * 4 + mode.totalFat * 9
+                        print(mode.totalCalories)
+                        print(mode.userFoodDict)
+        elif mode.userList:
+            if mode.userFoodDict == {} and (((mode.width/2 - 200) <= event.x <= (mode.width/2 + 200)) and ((mode.height/2 + 100) <= event.y <= (mode.height/2 + 200))): 
+                mode.userList = False
+            else:
+                if (mode.width-50 <= event.x <= mode.width) and (0 <= event.y <= 50): 
+                    mode.userList = False
 
     def getCachedPhotoImage(mode, image):
         # stores a cached version of the PhotoImage in the PIL/Pillow image
@@ -206,13 +234,28 @@ class SandboxMode(Mode):
                 # display food name and macro counts
                 canvas.create_text(300, mode.foodFullDict[foodname][2], text=foodname, font='Calibri 13 bold',anchor='w')
                 canvas.create_text(300, mode.foodFullDict[foodname][2] + 20, text=f'Carbs (g): {mode.foodFullDict[foodname][0][0]}', anchor='w')
-                canvas.create_text(400, mode.foodFullDict[foodname][2] + 20, text=f'Proteins (g): {mode.foodFullDict[foodname][0][1]}', anchor='w')
-                canvas.create_text(500, mode.foodFullDict[foodname][2] + 20, text=f'Fats (g): {mode.foodFullDict[foodname][0][2]}', anchor='w')
+                canvas.create_text(400, mode.foodFullDict[foodname][2] + 20, text=f'Protein (g): {mode.foodFullDict[foodname][0][1]}', anchor='w')
+                canvas.create_text(500, mode.foodFullDict[foodname][2] + 20, text=f'Fat (g): {mode.foodFullDict[foodname][0][2]}', anchor='w')
                 # separate foods with lines
                 canvas.create_line(200, mode.foodFullDict[foodname][2] + 37.5, mode.width, mode.foodFullDict[foodname][2] + 37.5)
                 # add-to-list button
                 canvas.create_rectangle(575, mode.foodFullDict[foodname][2] + 20, 650, mode.foodFullDict[foodname][2] + 35, fill='cyan')
                 canvas.create_text(612.5, mode.foodFullDict[foodname][2] + 27.5, text='Add to List')
+    
+    def displayUserFoods(mode, canvas):
+        for foodname in mode.userFoodDict:
+            resizedImage = mode.scaleImage(mode.loadImage(mode.userFoodDict[foodname][1]), 0.5)
+            cachedResizedImage = mode.getCachedPhotoImage(resizedImage)
+            # create the cached image
+            canvas.create_image(50, mode.userFoodDict[foodname][5], image=cachedResizedImage)
+            # display food name and macro counts
+            canvas.create_text(100, mode.userFoodDict[foodname][5], text=foodname, font='Calibri 13 bold',anchor='w')
+            canvas.create_text(100, mode.userFoodDict[foodname][5] + 20, text=f'Quantity (servings): {mode.userFoodDict[foodname][3]}', anchor='w')
+            canvas.create_text(230, mode.userFoodDict[foodname][5] + 20, text='Total Carbs (g): %0.2f' % mode.userFoodDict[foodname][4][0], anchor='w')
+            canvas.create_text(360, mode.userFoodDict[foodname][5] + 20, text='Total Protein (g): %0.2f' % mode.userFoodDict[foodname][4][1], anchor='w')
+            canvas.create_text(490, mode.userFoodDict[foodname][5] + 20, text='Total Fat (g): %0.2f' % mode.userFoodDict[foodname][4][2], anchor='w')
+            # separate foods with lines
+            canvas.create_line(0, mode.userFoodDict[foodname][5] + 37.5, mode.width, mode.userFoodDict[foodname][5] + 37.5)
 
     def getFoodDict(mode, userinput):
         # CITATION: https://github.com/USDA/USDA-APIs/issues/64
@@ -277,31 +320,28 @@ class SandboxMode(Mode):
         print(mode.foodFullDict) # final food dict with macros + image url
     
     def redrawAll(mode, canvas):
-        canvas.create_line(200, 0, 200, mode.height)     
-        canvas.create_rectangle(0, 0, 200, 250, fill='red')
-        canvas.create_text(100, 125, text='Search Food / Drink', font='Calibri 15 bold')
-        canvas.create_rectangle(0, 250, 200, 500, fill='yellow')
-        canvas.create_text(100, 375, text='Check Current User List', font='Calibri 15 bold')
-        canvas.create_rectangle(0, 500, 200, 750, fill='green')
-        canvas.create_text(100, 625, text='See Results', font='Calibri 15 bold')    
-        mode.displayFoods(canvas)
-
-class UserFoodsList(SandboxMode):
-    def appStarted(mode):
-        pass
-
-    def keyPressed(mode, event):
-        pass
-
-    def mousePressed(mode, event):
-        pass
-
-    def displayUserFoods(mode, canvas):
-        pass
-
-    def redrawAll(mode, canvas):
-        pass
-
+        if not mode.userList:
+            canvas.create_line(200, 0, 200, mode.height)     
+            canvas.create_rectangle(0, 0, 200, 250, fill='red')
+            canvas.create_text(100, 125, text='Search Food / Drink', font='Calibri 15 bold')
+            canvas.create_rectangle(0, 250, 200, 500, fill='yellow')
+            canvas.create_text(100, 375, text='Check Current User List', font='Calibri 15 bold')
+            canvas.create_rectangle(0, 500, 200, 750, fill='green')
+            canvas.create_text(100, 625, text='See Results', font='Calibri 15 bold')    
+            mode.displayFoods(canvas)
+        elif mode.userList:
+            if mode.userFoodDict == {}: 
+                canvas.create_text(mode.width/2, mode.height/2, text='You have no foods or drinks in your list.', font='Calibri 15 bold')
+                canvas.create_rectangle(mode.width/2 - 200, mode.height/2 + 100, mode.width/2 + 200, mode.height/2 + 200, fill='cyan')
+                canvas.create_text(mode.width/2, mode.height/2 + 150, text='Go Back to Search & Add Food / Drinks', font='Calibri 12 bold')
+            else:
+                canvas.create_text(5, 25, text='User List of Foods / Drinks', font='Calibri 15 bold', anchor='w')
+                canvas.create_text(250, 25, text='Total Carbs (g): %0.2f' % mode.totalCarbs, anchor='w') # total carbs
+                canvas.create_text(375, 25, text='Total Protein (g): %0.2f' % mode.totalProtein, anchor='w') # total proteins
+                canvas.create_text(500, 25, text='Total Fat (g): %0.2f' % mode.totalFat, anchor='w') # total fats
+                canvas.create_rectangle(mode.width - 50, 0, mode.width, 50, fill='cyan') # back button
+                canvas.create_text(mode.width - 25, 25, text='Back', font='Calibri 10 bold')
+                mode.displayUserFoods(canvas)
 
 class Results(SandboxMode):
     def appStarted(mode):
@@ -376,7 +416,6 @@ class MyModalApp(ModalApp):
     def appStarted(app):
         app.splashScreenMode = SplashScreenMode()
         app.sandboxMode = SandboxMode()
-        app.userList = UserFoodsList()
         app.resultsMode = Results()
         app.puzzleMode = PuzzleMode()
         app.instructions = Instructions()
