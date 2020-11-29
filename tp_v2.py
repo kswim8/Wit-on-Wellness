@@ -4,11 +4,6 @@ import module_manager
 module_manager.review()
 from cmu_112_graphics import *
 import random, requests, bs4, json, numpy
-# from matplotlib import pyplot as plt
-# import tkinter as tk
-# from pandas import DataFrame
-# import matplotlib.pyplot as plt
-# from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class SplashScreenMode(Mode):
     def appStarted(mode):
@@ -51,6 +46,10 @@ class SandboxMode(Mode):
     totalProtein = 0
     totalFat = 0
     totalCalories = 0
+    userTDEE = None
+    userCurrentWeight = None
+    userDesiredWeight = None
+    userTimeExpected = None
 
     def appStarted(mode):
         mode.results = False
@@ -128,6 +127,10 @@ class SandboxMode(Mode):
             else:
                 mode.userGoal2 = int(mode.userGoal2)
                 break
+        SandboxMode.userCurrentWeight = mode.userWeight
+        SandboxMode.userDesiredWeight = mode.userGoal
+        SandboxMode.userTimeExpected = mode.userTime
+        print(SandboxMode.userCurrentWeight, SandboxMode.userDesiredWeight, SandboxMode.userTimeExpected)
     
     def calculateTDEE(mode):
         # CITATION: https://steelfitusa.com/2018/10/calculate-tdee/
@@ -142,6 +145,8 @@ class SandboxMode(Mode):
         elif mode.userLevelOfActivity == 3: mode.userTDEE = 1.55 * mode.userBMR
         elif mode.userLevelOfActivity == 4: mode.userTDEE = 1.725 * mode.userBMR
         elif mode.userLevelOfActivity == 5: mode.userTDEE = 1.9 * mode.userBMR
+
+        SandboxMode.userTDEE = mode.userTDEE
 
     def keyPressed(mode, event):
         if (event.key == 'Escape'):
@@ -210,25 +215,31 @@ class SandboxMode(Mode):
                     mode.userList = False
 
     def calculateQuantities(mode, newFoodCoord):
-        mode.quantity = mode.getUserInput("How many servings (integer)?")
+        mode.quantity = mode.getUserInput("How many servings?")
+        # CITATION: https://stackoverflow.com/questions/354038/how-do-i-check-if-a-string-is-a-number-float
+        mode.quantityReplaced = mode.quantity.replace('.','', 1)
         while True:
-            if mode.quantity == None or not mode.quantity.isdigit() or int(mode.quantity) > 100 or int(mode.quantity) < 0:
-                mode.quantity = mode.getUserInput("How many servings (integer)?")
+            if mode.quantity == None or not mode.quantityReplaced.isdigit() or float(mode.quantity) > 100 or float(mode.quantity) < 0:
+                mode.quantity = mode.getUserInput("How many servings?")
+                mode.quantityReplaced = mode.quantity.replace('.','', 1)
             else:
-                mode.quantity = int(mode.quantity)
+                mode.quantity = float(mode.quantity)
                 break
+        # finding new quantities for macros based on num of servings
         newCarbs = mode.quantity * mode.foodFullDict[newFoodCoord][0][0]
         newProteins =  mode.quantity * mode.foodFullDict[newFoodCoord][0][1]
         newFats = mode.quantity * mode.foodFullDict[newFoodCoord][0][2]
         newCalories = mode.quantity * mode.foodFullDict[newFoodCoord][0][3]
+        # add to userFoodDict
         mode.userFoodDict[newFoodCoord] = mode.foodFullDict[newFoodCoord] + [mode.quantity] + [(newCarbs, newProteins, newFats, newCalories)] + [85 + 75 * mode.userfoodcounter]
         mode.userfoodcounter += 1
+        # increment class attributes
         SandboxMode.totalCarbs += newCarbs
         SandboxMode.totalProtein += newProteins
         SandboxMode.totalFat += newFats
         SandboxMode.totalCalories = SandboxMode.totalCarbs * 4 + SandboxMode.totalProtein * 4 + SandboxMode.totalFat * 9
-        print(SandboxMode.totalCalories)
-        print(mode.userFoodDict)
+        # print(SandboxMode.totalCalories)
+        # print(mode.userFoodDict)
 
     def getCachedPhotoImage(mode, image):
         # stores a cached version of the PhotoImage in the PIL/Pillow image
@@ -366,18 +377,71 @@ class SandboxMode(Mode):
 
 class Results(SandboxMode):
     def appStarted(mode):
-        pass
+        # SandboxMode.totalCarbs = 0
+        # SandboxMode.totalProtein = 0
+        # SandboxMode.totalFat = 0
+        # SandboxMode.totalCalories = 0
+        # SandboxMode.userTDEE = None
+        # SandboxMode.userCurrentWeight = None
+        # SandboxMode.userDesiredWeight = None
+        # SandboxMode.userTimeExpected = None
+        # THE FOLLOWING CODE GOES MORE INTO ABOUT THE WEIGHT LOSS AND CALORIE DEFICIT RESTRICTIONS
+        if SandboxMode.userCurrentWeight == SandboxMode.userDesiredWeight:
+            print("To maintain weight, try to eat about", SandboxMode.userTDEE, "calories per day and maintain consistent exercise levels.")
+            pass
+        elif SandboxMode.userCurrentWeight > SandboxMode.userDesiredWeight:
+            mode.caloriesToLosePerDay = 3500 * (SandboxMode.userCurrentWeight - SandboxMode.userDesiredWeight) / SandboxMode.userTimeExpected
+            print(mode.caloriesToLosePerDay)
+            if mode.caloriesToLosePerDay > 1000:
+                mode.daysMin = 3500 * (SandboxMode.userCurrentWeight - SandboxMode.userDesiredWeight) / 1000
+                mode.daysMax = 3500 * (SandboxMode.userCurrentWeight - SandboxMode.userDesiredWeight) / 500
+                print("Realistically, you should try to lose this weight in", mode.daysMin, "to", mode.daysMax, "days.")
+                print("This means still eating at least", (SandboxMode.userTDEE - 1000), "and at most", (SandboxMode.userTDEE - 500),"calories per day while exercising consistently for healthy weight loss!")
+            else:
+                print("You need to eat about", mode.caloriesToLosePerDay, "less calories per day to reach your goal.")
+                print("This means eating about", (SandboxMode.userTDEE - mode.caloriesToLosePerDay), "calories per day while exercising consistently!")
+                pass
+        elif SandboxMode.userCurrentWeight < SandboxMode.userDesiredWeight:
+            mode.caloriesToGainPerDay = 3500 * (SandboxMode.userCurrentWeight - SandboxMode.userDesiredWeight) / SandboxMode.userTimeExpected
+            print(mode.caloriesToGainPerDay)
+            if mode.caloriesToGainPerDay > 1000:
+                mode.daysMin = 3500 * (SandboxMode.userDesiredWeight - SandboxMode.userCurrentWeight) / 1000
+                mode.daysMax = 3500 * (SandboxMode.userDesiredWeight - SandboxMode.userCurrentWeight) / 500
+                print("Realistically, you should try to gain this weight in", mode.daysMin, "to", mode.daysMax, "days.")
+                print("This means eating at most", (SandboxMode.userTDEE - 1000), "calories per day while exercising consistently for healthy weight gain!")
+            else:
+                print("You need to eat about", mode.caloriesToLosePerDay, "more calories per day to reach your goal.")
+                print("This means eating about", (SandboxMode.userTDEE - mode.caloriesToLosePerDay), "calories per day while exercising consistently!")
+                pass
 
     def keyPressed(mode, event):
         if (event.key == 'Escape'):
             mode.app.setActiveMode(mode.app.splashScreenMode)
 
+    def mousePressed(mode, event):
+        pass
+
+    def mouseMoved(mode, event):
+        pass
+
+    def findProportions(mode):
+        mode.carbsProportion = SandboxMode.totalCarbs / SandboxMode.totalCalories
+        mode.proteinProportion = SandboxMode.totalProtein / SandboxMode.totalCalories 
+        mode.fatProportion = SandboxMode.totalFat / SandboxMode.totalCalories  
+    
+    def checkProportions(mode):
+        pass
+
     def drawBarGraph(mode, canvas):
         pass
 
+    def drawLinePlot(mode, canvas):
+        pass
     
     def redrawAll(mode, canvas):
         canvas.create_text(mode.width/2, 20, text='Results', font='Calibri 15 bold')
+        canvas.create_text(mode.width/4, 50, text='Macronutrient Proportions', font='Calibri 15 bold')
+        canvas.create_text(3*mode.width/4, 50, text='Time Plan', font='Calibri 15 bold')
 
         # if mode.results:
         #     data1 = {'Macronutrients': ['CARB', 'PROT', 'FATS'],
@@ -397,21 +461,103 @@ class Results(SandboxMode):
 
 class PuzzleMode(Mode):
     def appStarted(mode):
-        pass
+        mode.puzzle1 = False
+        mode.puzzle2 = False
 
     def keyPressed(mode, event):
         if (event.key == 'Escape'):
             mode.app.setActiveMode(mode.app.splashScreenMode)
+
+    def mousePressed(mode, event):
+        if (0 <= event.x <= 200) and (0 <= event.y <= 375): 
+            mode.app.setActiveMode(mode.app.puzzleMode1)
+        elif (0 <= event.x <= 200) and (375 < event.y <= 750): 
+            mode.app.setActiveMode(mode.app.puzzleMode2)
+
+    def mouseMoved(mode, event):
+        if (0 <= event.x <= 200) and (0 <= event.y <= 375): 
+            mode.puzzle1 = True
+            mode.puzzle2 = False
+        elif (0 <= event.x <= 200) and (375 < event.y <= 750): 
+            mode.puzzle2 = True
+            mode.puzzle1 = False
+        else:
+            mode.puzzle1 = mode.puzzle2 = False
+
+    def redrawAll(mode, canvas):
+        canvas.create_line(200, 0, 200, mode.height)
+        # If I feel like making 3 puzzle modes     
+        # canvas.create_rectangle(0, 0, 200, 250, fill='red')
+        # canvas.create_text(100, 125, text='Puzzle 1', font='Calibri 15 bold')
+        # canvas.create_rectangle(0, 250, 200, 500, fill='yellow')
+        # canvas.create_text(100, 375, text='Puzzle 2', font='Calibri 15 bold')
+        # canvas.create_rectangle(0, 500, 200, 750, fill='green')
+        # canvas.create_text(100, 625, text='Puzzle 3', font='Calibri 15 bold')
+        canvas.create_rectangle(0, 0, 200, 375, fill='green')
+        canvas.create_text(100, 187.5, text='Puzzle 1\nDifficulty: Easy', font='Calibri 15 bold')
+        canvas.create_rectangle(0, 375, 200, 750, fill='red')
+        canvas.create_text(100, 562.5, text='Puzzle 2\nDifficulty: Hard', font='Calibri 15 bold')
+        if mode.puzzle1:
+            canvas.create_text(2*mode.width/3, 50, text='Puzzle 1: Highest Calorie Food', font='Calibri 20 bold')
+            canvas.create_text(250, mode.height/2 - 200, text='Given a list of foods and\ntheir macronutrient proportions,\nfind the food with the most calories!', font='Calibri 15 bold', anchor='w')
+            # CITATION: https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Good_Food_Display_-_NCI_Visuals_Online.jpg/1200px-Good_Food_Display_-_NCI_Visuals_Online.jpg
+            canvas.create_image(2*mode.width/3, 3*mode.height/4 - 100, image=ImageTk.PhotoImage(mode.scaleImage(mode.loadImage('foodspic.jpg'), 0.35)))
+        elif mode.puzzle2:
+            canvas.create_text(2*mode.width/3, 50, text='Puzzle 2: Food Choice Optimization', font='Calibri 20 bold')
+            canvas.create_text(250, mode.height/2-200, text='Given a restaurant menu of\nfoods + prices and a spending limit,\nfind a combination of food that will\nbe the most fulfilling in calories!', font='Calibri 15 bold', anchor='w')
+            # CITATION: https://fiverr-res.cloudinary.com/images/q_auto,f_auto/gigs/117520118/original/97b74413d19313b1d51958209e87e414a4ba3719/design-restaurant-menu-menu-design-food-menu-price-list-menu-catalog-pdf-flyer.jpg
+            canvas.create_image(2*mode.width/3, 3*mode.height/4 - 100, image=ImageTk.PhotoImage(mode.scaleImage(mode.loadImage('restaurantmenupic.jpg'), 0.25)))
+        if not (mode.puzzle1 or mode.puzzle2):
+            canvas.create_text(2*mode.width/3, mode.height/2 - 200, text='Hover over one of\nthe puzzle choices\nto see what they are!', font='Calibri 20 bold')
+            canvas.create_text(2*mode.width/3, mode.height/2 + 200, text='Click one of them\nwhen you are ready\nto play and learn!', font='Calibri 20 bold')
+
+# Puzzle 1: Highest Calorie Food
+class PuzzleMode1(PuzzleMode):
+    pass
+
+# Puzzle 2: Food Choice Optimization (LINEAR PROGRAMMING)
+class PuzzleMode2(PuzzleMode):
+    pass
 
 class Instructions(Mode):
     def appStarted(mode):
-        pass
+        url = 'https://i.pinimg.com/originals/fe/f7/2f/fef72f73f4f961b4ed6f8e4bb093eb1b.jpg'
+        mode.appIcon = mode.loadImage(url)
+        mode.appIcon2 = mode.scaleImage(mode.appIcon, 4.5/10)
+        filename1 = 'sandboxmodepic.png'
+        mode.sandboxImage = mode.loadImage(filename1)
+        mode.sandboxImage2 = mode.scaleImage(mode.sandboxImage, 0.45)
+        filename2 = 'puzzlemodepic.png'
+        mode.puzzleImage = mode.loadImage(filename2)
+        mode.puzzleImage2 = mode.scaleImage(mode.puzzleImage, 0.45)
 
     def keyPressed(mode, event):
         if (event.key == 'Escape'):
             mode.app.setActiveMode(mode.app.splashScreenMode)
+
+    def mousePressed(mode, event):
+        if ((mode.width/4 - 75 <= event.x <= mode.width/4 + 75) and (35 <= event.y <= 65)) or ((mode.width/4 - 100 <= event.x <= mode.width/4 + 100) and (670 <= event.y <= 700)): mode.app.setActiveMode(mode.app.sandboxMode)
+        elif ((3*mode.width/4 - 75 <= event.x <= 3*mode.width/4 + 75) and (35 <= event.y <= 65)) or ((3*mode.width/4 - 100 <= event.x <= 3*mode.width/4 + 100) and (670 <= event.y <= 700)): mode.app.setActiveMode(mode.app.puzzleMode)
     
     def redrawAll(mode, canvas):
+        canvas.create_image(mode.width/2, mode.height/2, image=ImageTk.PhotoImage(mode.appIcon2))
+        canvas.create_rectangle(mode.width/4 - 75, 35, mode.width/4 + 75, 65, fill='white')
+        canvas.create_rectangle(3*mode.width/4 - 75, 35, 3*mode.width/4 + 75, 65, fill='white')
+        canvas.create_rectangle(0, 3*mode.height/4 - 100, mode.width, 3*mode.height/4 + 100, fill='white')
+        canvas.create_line(mode.width/2, 3*mode.height/4 - 100, mode.width/2, 3*mode.height/4 + 100)
+
+        canvas.create_rectangle(mode.width/4 - 100, 670, mode.width/4 + 100, 700, fill='white')
+        canvas.create_rectangle(3*mode.width/4 - 100, 670, 3*mode.width/4 + 100, 700, fill='white')
+        canvas.create_text(mode.width/4, 685, text='Play Sandbox Mode', font='Calibri 15 bold')
+        canvas.create_text(3*mode.width/4, 685, text='Play Puzzle Mode', font='Calibri 15 bold')
+
+        canvas.create_text(mode.width/2, 20, text='Instructions', font='Calibri 18 bold')
+        canvas.create_text(mode.width/4, 50, text='Sandbox Mode', font='Calibri 15 bold')
+        canvas.create_image(mode.width/4, mode.height/2 - 100, image=ImageTk.PhotoImage(mode.sandboxImage2))
+        canvas.create_text(3*mode.width/4, 50, text='Puzzle Mode', font='Calibri 15 bold')
+        canvas.create_image(3*mode.width/4, mode.height/2 - 100, image=ImageTk.PhotoImage(mode.puzzleImage2))
+        canvas.create_text(mode.width/4, 3*mode.height/4,   text='In Sandbox Mode, you can experiment\nwith different foods and diets and\nmake your own food plan! You can\nlearn about what kind of goals you can set,\nas well as receive feedback and\nresults about your goals.', font='Calibri 12')
+        canvas.create_text(3*mode.width/4, 3*mode.height/4, text='In Puzzle Mode, you can try solving\nthe different puzzles given a certain\nscenario! You can learn about\noptimizing ingredients or picking the best\nfoods to eat when you are trying\nto meet a goal.', font='Calibri 12')
         pass
 
 class Credits(Mode):
@@ -422,22 +568,9 @@ class Credits(Mode):
         if (event.key == 'Escape'):
             mode.app.setActiveMode(mode.app.splashScreenMode)
 
-class HelpMode(Mode):
-    def appStarted(mode):
-        url = 'https://i.pinimg.com/originals/fe/f7/2f/fef72f73f4f961b4ed6f8e4bb093eb1b.jpg'
-        mode.appIcon = mode.loadImage(url)
-        mode.appIcon2 = mode.scaleImage(mode.appIcon, 1/3)
-
     def redrawAll(mode, canvas):
-        font = 'Courier 20 bold'
-        canvas.create_image(250, 250, image=ImageTk.PhotoImage(mode.appIcon2))
-        canvas.create_text(mode.width/2, 75, text='Instructions', font=font)
-        canvas.create_text(mode.width/2, 150, text='This is the help screen!', font=font)
-        canvas.create_text(mode.width/2, 250, text='(Insert helpful message here)', font=font)
-        canvas.create_text(mode.width/2, 350, text='Press any key to return to the game!', font=font)
-
-    def keyPressed(mode, event):
-        mode.app.setActiveMode(mode.app.gameMode)
+        # canvas.create_text(mode.width/2, mode.height/2, text='Keren Huang\nMentor: Alex Xie')
+        pass
 
 class MyModalApp(ModalApp):
     def appStarted(app):
@@ -445,6 +578,8 @@ class MyModalApp(ModalApp):
         app.sandboxMode = SandboxMode()
         app.resultsMode = Results()
         app.puzzleMode = PuzzleMode()
+        app.puzzleMode1 = PuzzleMode1()
+        app.puzzleMode2 = PuzzleMode2()
         app.instructions = Instructions()
         app.credits = Credits()
         # app.helpMode = HelpMode()
