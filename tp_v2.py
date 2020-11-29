@@ -4,11 +4,11 @@ import module_manager
 module_manager.review()
 from cmu_112_graphics import *
 import random, requests, bs4, json, numpy
-from matplotlib import pyplot as plt
-import tkinter as tk
-from pandas import DataFrame
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+# from matplotlib import pyplot as plt
+# import tkinter as tk
+# from pandas import DataFrame
+# import matplotlib.pyplot as plt
+# from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class SplashScreenMode(Mode):
     def appStarted(mode):
@@ -47,14 +47,19 @@ class SplashScreenMode(Mode):
         canvas.create_text(3*mode.width/4+25, 3*mode.height/4+25, text='Credits', font='Calibri 15 bold')
 
 class SandboxMode(Mode):
+    totalCarbs = 0
+    totalProtein = 0
+    totalFat = 0
+    totalCalories = 0
+
     def appStarted(mode):
         mode.results = False
         mode.foodentered = False
         mode.userList = False
         mode.takeUserInputData()
-        print(mode.userGender, mode.userAge, mode.userHeight, mode.userWeight, mode.userLevelOfActivity, mode.userGoal, mode.userTime)
+        # print(mode.userGender, mode.userAge, mode.userHeight, mode.userWeight, mode.userLevelOfActivity, mode.userGoal, mode.userTime)
         mode.calculateTDEE()
-        print(mode.userTDEE)
+        # print(mode.userTDEE)
         ''' # THE FOLLOWING CODE GOES MORE INTO ABOUT THE WEIGHT LOSS AND CALORIE DEFICIT RESTRICTIONS
         mode.caloriesToLosePerDay = 3500 * (mode.userWeight - mode.userGoal) / mode.userTime
         print(mode.caloriesToLosePerDay)
@@ -66,10 +71,6 @@ class SandboxMode(Mode):
             print("You need to eat about", mode.caloriesToLosePerDay, "less calories per day!")'''
         mode.userFoodDict = dict()
         mode.userfoodcounter = 0
-        mode.totalCarbs = 0
-        mode.totalProtein = 0
-        mode.totalFat = 0
-        mode.totalCalories = 0
 
     def takeUserInputData(mode):
         mode.userGender = mode.getUserInput("What is your biological/current gender (M/F) ?")
@@ -119,6 +120,13 @@ class SandboxMode(Mode):
                 mode.userTime = mode.getUserInput("In how many days do you want to achieve your target weight (integer)?")
             else:
                 mode.userTime = int(mode.userTime)
+                break
+        mode.userGoal2 = mode.getUserInput("Pick the goal that most closely relates to what you're looking for:\n 1 = Lose fat\n 2 = Build muscle\n 3 = Balanced diet")
+        while True:
+            if mode.userGoal2 == None or not (mode.userGoal2).isdigit() or int(mode.userGoal2) > 3 or int(mode.userGoal2) < 1:
+                mode.userGoal2 = mode.getUserInput("Pick the goal that most closely relates to what you're looking for:\n 1 = Lose fat\n 2 = Build muscle\n 3 = Balanced diet")
+            else:
+                mode.userGoal2 = int(mode.userGoal2)
                 break
     
     def calculateTDEE(mode):
@@ -192,30 +200,35 @@ class SandboxMode(Mode):
                         newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(700)]
                         mode.foodselected = True
                     if mode.foodselected:
-                        mode.quantity = mode.getUserInput("How many servings (integer)?")
-                        while True:
-                            if mode.quantity == None or not mode.quantity.isdigit() or int(mode.quantity) > 100 or int(mode.quantity) < 0:
-                                mode.quantity = mode.getUserInput("How many servings (integer)?")
-                            else:
-                                mode.quantity = int(mode.quantity)
-                                break
-                        newCarbs = mode.quantity * mode.foodFullDict[newFoodCoord][0][0]
-                        newProteins =  mode.quantity * mode.foodFullDict[newFoodCoord][0][1]
-                        newFats = mode.quantity * mode.foodFullDict[newFoodCoord][0][2]
-                        mode.userFoodDict[newFoodCoord] = mode.foodFullDict[newFoodCoord] + [mode.quantity] + [(newCarbs, newProteins, newFats)] + [75 + 75 * mode.userfoodcounter]
-                        mode.userfoodcounter += 1
-                        mode.totalCarbs += newCarbs
-                        mode.totalProtein += newProteins
-                        mode.totalFat += newFats
-                        mode.totalCalories = mode.totalCarbs * 4 + mode.totalProtein * 4 + mode.totalFat * 9
-                        print(mode.totalCalories)
-                        print(mode.userFoodDict)
+                        mode.calculateQuantities(newFoodCoord)
+
         elif mode.userList:
             if mode.userFoodDict == {} and (((mode.width/2 - 200) <= event.x <= (mode.width/2 + 200)) and ((mode.height/2 + 100) <= event.y <= (mode.height/2 + 200))): 
                 mode.userList = False
             else:
                 if (mode.width-50 <= event.x <= mode.width) and (0 <= event.y <= 50): 
                     mode.userList = False
+
+    def calculateQuantities(mode, newFoodCoord):
+        mode.quantity = mode.getUserInput("How many servings (integer)?")
+        while True:
+            if mode.quantity == None or not mode.quantity.isdigit() or int(mode.quantity) > 100 or int(mode.quantity) < 0:
+                mode.quantity = mode.getUserInput("How many servings (integer)?")
+            else:
+                mode.quantity = int(mode.quantity)
+                break
+        newCarbs = mode.quantity * mode.foodFullDict[newFoodCoord][0][0]
+        newProteins =  mode.quantity * mode.foodFullDict[newFoodCoord][0][1]
+        newFats = mode.quantity * mode.foodFullDict[newFoodCoord][0][2]
+        newCalories = mode.quantity * mode.foodFullDict[newFoodCoord][0][3]
+        mode.userFoodDict[newFoodCoord] = mode.foodFullDict[newFoodCoord] + [mode.quantity] + [(newCarbs, newProteins, newFats, newCalories)] + [85 + 75 * mode.userfoodcounter]
+        mode.userfoodcounter += 1
+        SandboxMode.totalCarbs += newCarbs
+        SandboxMode.totalProtein += newProteins
+        SandboxMode.totalFat += newFats
+        SandboxMode.totalCalories = SandboxMode.totalCarbs * 4 + SandboxMode.totalProtein * 4 + SandboxMode.totalFat * 9
+        print(SandboxMode.totalCalories)
+        print(mode.userFoodDict)
 
     def getCachedPhotoImage(mode, image):
         # stores a cached version of the PhotoImage in the PIL/Pillow image
@@ -232,7 +245,8 @@ class SandboxMode(Mode):
                 # create the cached image
                 canvas.create_image(250, mode.foodFullDict[foodname][2], image=cachedResizedImage)
                 # display food name and macro counts
-                canvas.create_text(300, mode.foodFullDict[foodname][2], text=foodname, font='Calibri 13 bold',anchor='w')
+                canvas.create_text(300, mode.foodFullDict[foodname][2] - 17.5, text=foodname, font='Calibri 13 bold',anchor='w')
+                canvas.create_text(300, mode.foodFullDict[foodname][2], text='Calories: %0.2f' % mode.foodFullDict[foodname][0][3], anchor='w')
                 canvas.create_text(300, mode.foodFullDict[foodname][2] + 20, text=f'Carbs (g): {mode.foodFullDict[foodname][0][0]}', anchor='w')
                 canvas.create_text(400, mode.foodFullDict[foodname][2] + 20, text=f'Protein (g): {mode.foodFullDict[foodname][0][1]}', anchor='w')
                 canvas.create_text(500, mode.foodFullDict[foodname][2] + 20, text=f'Fat (g): {mode.foodFullDict[foodname][0][2]}', anchor='w')
@@ -249,7 +263,8 @@ class SandboxMode(Mode):
             # create the cached image
             canvas.create_image(50, mode.userFoodDict[foodname][5], image=cachedResizedImage)
             # display food name and macro counts
-            canvas.create_text(100, mode.userFoodDict[foodname][5], text=foodname, font='Calibri 13 bold',anchor='w')
+            canvas.create_text(100, mode.userFoodDict[foodname][5] - 17.5, text=foodname, font='Calibri 13 bold',anchor='w')
+            canvas.create_text(100, mode.userFoodDict[foodname][5], text='Calories: %0.2f' % mode.userFoodDict[foodname][4][3], anchor='w')
             canvas.create_text(100, mode.userFoodDict[foodname][5] + 20, text=f'Quantity (servings): {mode.userFoodDict[foodname][3]}', anchor='w')
             canvas.create_text(230, mode.userFoodDict[foodname][5] + 20, text='Total Carbs (g): %0.2f' % mode.userFoodDict[foodname][4][0], anchor='w')
             canvas.create_text(360, mode.userFoodDict[foodname][5] + 20, text='Total Protein (g): %0.2f' % mode.userFoodDict[foodname][4][1], anchor='w')
@@ -295,7 +310,8 @@ class SandboxMode(Mode):
                         carbContent = nutrientDict['value']
                 # add a key value pair for the food with tuple of protein/fat/content
                 # mode.foodFullDict[foodname] = (proteinContent, fatContent, carbContent)
-                mode.foodFullDict[foodname] = (carbContent, proteinContent, fatContent)
+                calories = carbContent * 4 + proteinContent * 4 + fatContent * 9
+                mode.foodFullDict[foodname] = (carbContent, proteinContent, fatContent, calories)
 
         except IndexError:
             # if there are no search results, print this and repeat
@@ -336,9 +352,14 @@ class SandboxMode(Mode):
                 canvas.create_text(mode.width/2, mode.height/2 + 150, text='Go Back to Search & Add Food / Drinks', font='Calibri 12 bold')
             else:
                 canvas.create_text(5, 25, text='User List of Foods / Drinks', font='Calibri 15 bold', anchor='w')
-                canvas.create_text(250, 25, text='Total Carbs (g): %0.2f' % mode.totalCarbs, anchor='w') # total carbs
-                canvas.create_text(375, 25, text='Total Protein (g): %0.2f' % mode.totalProtein, anchor='w') # total proteins
-                canvas.create_text(500, 25, text='Total Fat (g): %0.2f' % mode.totalFat, anchor='w') # total fats
+                canvas.create_line(0, 50, mode.width, 50)
+                # canvas.create_text(250, 25, text='Total Carbs (g): %0.2f' % mode.totalCarbs, anchor='w') # total carbs
+                # canvas.create_text(375, 25, text='Total Protein (g): %0.2f' % mode.totalProtein, anchor='w') # total proteins
+                # canvas.create_text(500, 25, text='Total Fat (g): %0.2f' % mode.totalFat, anchor='w') # total fats
+                canvas.create_text(235, 25 - 10, text='Total Calories: %0.2f' % SandboxMode.totalCalories, anchor='w')
+                canvas.create_text(235, 25 + 10, text='Total Carbs (g): %0.2f' % SandboxMode.totalCarbs, anchor='w') # total carbs
+                canvas.create_text(360, 25 + 10, text='Total Protein (g): %0.2f' % SandboxMode.totalProtein, anchor='w') # total proteins
+                canvas.create_text(485, 25 + 10, text='Total Fat (g): %0.2f' % SandboxMode.totalFat, anchor='w') # total fats
                 canvas.create_rectangle(mode.width - 50, 0, mode.width, 50, fill='cyan') # back button
                 canvas.create_text(mode.width - 25, 25, text='Back', font='Calibri 10 bold')
                 mode.displayUserFoods(canvas)
@@ -350,8 +371,14 @@ class Results(SandboxMode):
     def keyPressed(mode, event):
         if (event.key == 'Escape'):
             mode.app.setActiveMode(mode.app.splashScreenMode)
+
+    def drawBarGraph(mode, canvas):
+        pass
+
     
     def redrawAll(mode, canvas):
+        canvas.create_text(mode.width/2, 20, text='Results', font='Calibri 15 bold')
+
         # if mode.results:
         #     data1 = {'Macronutrients': ['CARB', 'PROT', 'FATS'],
         #     'Percentage of Diet': [0.25, 0.25, 0.50]
