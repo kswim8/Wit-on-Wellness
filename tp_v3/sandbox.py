@@ -1,4 +1,5 @@
 from cmu_112_graphics import *
+import random, requests, bs4, json
 
 class SandboxMode(Mode):
     totalCarbs = 0
