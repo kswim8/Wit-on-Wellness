@@ -3,7 +3,7 @@
 import module_manager
 module_manager.review()
 from cmu_112_graphics import *
-import random, requests, bs4, json, numpy
+import random, requests, bs4, json
 
 class SplashScreenMode(Mode):
     def appStarted(mode):
@@ -340,7 +340,7 @@ class SandboxMode(Mode):
             mode.foodFullDictCoords[foodname] = picCy
             picCy += 75    
 
-        print(mode.foodFullDict) # final food dict with macros + image url
+        # print(mode.foodFullDict) # final food dict with macros + image url
     
     def redrawAll(mode, canvas):
         if not mode.userList:
@@ -607,7 +607,7 @@ class Results(SandboxMode):
         else:
             if SandboxMode.userCurrentWeight > SandboxMode.userDesiredWeight:
                 mode.caloriesToLosePerDay = 3500 * (SandboxMode.userCurrentWeight - SandboxMode.userDesiredWeight) / SandboxMode.userTimeExpected
-                print(mode.caloriesToLosePerDay)
+                # print(mode.caloriesToLosePerDay)
                 if mode.caloriesToLosePerDay > 1000:
                     mode.daysMin = 3500 * (SandboxMode.userCurrentWeight - SandboxMode.userDesiredWeight) / 1000
                     mode.daysMax = 3500 * (SandboxMode.userCurrentWeight - SandboxMode.userDesiredWeight) / 500
@@ -632,7 +632,7 @@ class Results(SandboxMode):
                     # print("This means eating about", (SandboxMode.userTDEE - mode.caloriesToLosePerDay), "calories per day while exercising consistently!")
             elif SandboxMode.userCurrentWeight < SandboxMode.userDesiredWeight:
                 mode.caloriesToGainPerDay = 3500 * (SandboxMode.userCurrentWeight - SandboxMode.userDesiredWeight) / SandboxMode.userTimeExpected
-                print(mode.caloriesToGainPerDay)
+                # print(mode.caloriesToGainPerDay)
                 if mode.caloriesToGainPerDay > 1000:
                     mode.daysMin = 3500 * (SandboxMode.userDesiredWeight - SandboxMode.userCurrentWeight) / 1000
                     mode.daysMax = 3500 * (SandboxMode.userDesiredWeight - SandboxMode.userCurrentWeight) / 500
