@@ -57,18 +57,7 @@ class SandboxMode(Mode):
         mode.foodentered = False
         mode.userList = False
         mode.takeUserInputData()
-        # print(mode.userGender, mode.userAge, mode.userHeight, mode.userWeight, mode.userLevelOfActivity, mode.userGoal, mode.userTime)
         mode.calculateTDEE()
-        # print(mode.userTDEE)
-        ''' # THE FOLLOWING CODE GOES MORE INTO ABOUT THE WEIGHT LOSS AND CALORIE DEFICIT RESTRICTIONS
-        mode.caloriesToLosePerDay = 3500 * (mode.userWeight - mode.userGoal) / mode.userTime
-        print(mode.caloriesToLosePerDay)
-        if mode.caloriesToLosePerDay > 1000:
-            mode.daysMin = 3500 * (mode.userWeight - mode.userGoal) / 1000
-            mode.daysMax = 3500 * (mode.userWeight - mode.userGoal) / 500
-            print("Realistically, you should try to lose this weight in", mode.daysMin, "to", mode.daysMax, "days.")
-        else:
-            print("You need to eat about", mode.caloriesToLosePerDay, "less calories per day!")'''
         mode.userFoodDict = dict()
         mode.userfoodcounter = 0
 
@@ -247,6 +236,7 @@ class SandboxMode(Mode):
         # print(SandboxMode.totalCalories)
         # print(mode.userFoodDict)
 
+    # CITATION: https://www.cs.cmu.edu/~112/notes/notes-animations-part3.html
     def getCachedPhotoImage(mode, image):
         # stores a cached version of the PhotoImage in the PIL/Pillow image
         if ('cachedPhotoImage' not in image.__dict__):
@@ -383,7 +373,6 @@ class SandboxMode(Mode):
 
 class Results(SandboxMode):
     def appStarted(mode):
-        # THE FOLLOWING CODE GOES MORE INTO ABOUT THE WEIGHT LOSS AND CALORIE DEFICIT RESTRICTIONS
         mode.carbsText = False
         mode.proteinText = False
         mode.fatText = False
@@ -420,10 +409,7 @@ class Results(SandboxMode):
         pass
 
     def findProportions(mode):
-        # mode.sumOfMacros = SandboxMode.totalCarbs + SandboxMode.totalProtein + SandboxMode.totalFat 
-        # mode.carbsProportion = SandboxMode.totalCarbs / mode.sumOfMacros
-        # mode.proteinProportion = SandboxMode.totalProtein / mode.sumOfMacros 
-        # mode.fatProportion = SandboxMode.totalFat / mode.sumOfMacros  
+        # CITATION: https://kidshealth.org/en/teens/fat-calories.html#:~:text=A%20gram%20of%20carbohydrate%20contains,amount%20of%20the%20other%20two.
         mode.carbsProportion = 4 * SandboxMode.totalCarbs / SandboxMode.totalCalories
         mode.proteinProportion = 4 * SandboxMode.totalProtein / SandboxMode.totalCalories
         mode.fatProportion = 9 * SandboxMode.totalFat / SandboxMode.totalCalories
@@ -431,8 +417,10 @@ class Results(SandboxMode):
     def checkProportions(mode):
         # check for user's goal (lose fat, build muscle, etc.)
         # return a tuple of bar colors and bar heights
+
         mode.findProportions()
         # fat loss
+        # CITATION: https://www.womenshealthmag.com/uk/food/healthy-eating/a705352/best-macros-for-fat-loss/
         if SandboxMode.userGoal == 1:
             # 50, 35, 15, give or take 5
             if (0.45 <= mode.carbsProportion <= 0.55): mode.carbBarColor = 'green'
@@ -452,6 +440,7 @@ class Results(SandboxMode):
             mode.fatBar = [mode.fatProportion, mode.fatBarColor]
 
         # muscle gain
+        # CITATION: https://lifesum.com/health-education/how-to-count-macros-for-building-muscle-and-losing-fat/#:~:text=A%20typical%20macro%20breakdown%20for,two%20different%20types%20of%20mass.
         elif SandboxMode.userGoal == 2:
             # 30, 40, 30, give or take 5
             if (0.25 <= mode.carbsProportion <= 0.35): mode.carbBarColor = 'green'
@@ -539,8 +528,10 @@ class Results(SandboxMode):
                     canvas.create_text(mode.width/4, 500, text='0.25 to 0.35 for building muscle', font='Calibri 12 bold')
                 elif SandboxMode.userGoal == 3:
                     canvas.create_text(mode.width/4, 500, text='0.45 to 0.55 for balanced diet', font='Calibri 12 bold')
-
+            
+            # CITATION: https://www.nhs.uk/live-well/healthy-weight/why-we-need-to-eat-carbs/#:~:text=Carbohydrates%20are%20the%20body's%20main,important%20for%20long%2Dterm%20health.
             canvas.create_text(55, 550, text='Carbs are important because they are\nthe main source of energy for the body.', font='Calibri 12', anchor='w')
+            # CITATION: https://www.myfooddata.com/articles/foods-highest-in-carbohydrates.php
             canvas.create_text(55, 650, text='High-carb foods include grains (bread,\nrice, cereal), fruit, and more! ', font='Calibri 12', anchor='w')
 
         elif mode.proteinText:
@@ -566,7 +557,9 @@ class Results(SandboxMode):
                 elif SandboxMode.userGoal == 3:
                     canvas.create_text(mode.width/4, 500, text='0.20 to 0.30 for balanced diet', font='Calibri 12 bold')
 
+            # CITATION: https://www.piedmont.org/living-better/why-is-protein-important-in-your-diet
             canvas.create_text(55, 550, text='Protein is important because it builds,\nrepairs, and maintains cells, muscles,\nand tissue.', font='Calibri 12', anchor='w')
+            # CITATION: https://www.healthline.com/nutrition/20-delicious-high-protein-foods
             canvas.create_text(55, 650, text='High-protein foods include eggs,\nseafood, nuts, poultry, and more!', font='Calibri 12', anchor='w')
 
         elif mode.fatText: 
@@ -592,7 +585,9 @@ class Results(SandboxMode):
                 elif SandboxMode.userGoal == 3:
                     canvas.create_text(mode.width/4, 500, text='0.15 to 0.25 for balanced diet', font='Calibri 12 bold')
 
+            # CITATION: https://www.nhs.uk/live-well/eat-well/different-fats-nutrition/#:~:text=A%20small%20amount%20of%20fat,with%20the%20help%20of%20fats.
             canvas.create_text(55, 550, text='Fat is important for the body because\nwe need to absorb vitamin A/D/E,\nwhich fat does a good job of.', font='Calibri 12', anchor='w')
+            # CITATION: https://www.healthline.com/nutrition/10-super-healthy-high-fat-foods
             canvas.create_text(55, 650, text='Healthy, high-fat foods include\navocados, cheese, nuts,\neggs, and more!', font='Calibri 12', anchor='w')
         
         else:
