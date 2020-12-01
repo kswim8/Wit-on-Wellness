@@ -1,1 +1,1 @@
-# Run the project by running tp_v2.py
+# To run project: tp_v3 Folder --> tp_v3.py
