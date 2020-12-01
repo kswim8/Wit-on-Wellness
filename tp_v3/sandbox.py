@@ -283,7 +283,7 @@ class SandboxMode(Mode):
         except IndexError:
             # if there are no search results, print this and repeat
             if len(foodset) == 0:
-                mode.showMessage(f"Could not find a food or drink labeled {userinput}, please try again.")
+                mode.app.showMessage(f"Could not find a food or drink labeled {userinput}, please try again.")
             # otherwise, there's probably some single or <10 elements
 
         # CITATION: https://stackoverflow.com/questions/21530274/format-for-a-url-that-goes-to-google-image-search
@@ -300,7 +300,7 @@ class SandboxMode(Mode):
             mode.foodFullDictCoords[foodname] = picCy
             picCy += 75    
 
-        # print(mode.foodFullDict) # final food dict with macros + image url
+        print(mode.foodFullDict) # final food dict with macros + image url
     
     def redrawAll(mode, canvas):
         if not mode.userList:
@@ -591,7 +591,7 @@ class Results(SandboxMode):
                     # print("You need to eat about", mode.caloriesToLosePerDay, "less calories per day to reach your goal.")
                     # print("This means eating about", (SandboxMode.userTDEE - mode.caloriesToLosePerDay), "calories per day while exercising consistently!")
             elif SandboxMode.userCurrentWeight < SandboxMode.userDesiredWeight:
-                mode.caloriesToGainPerDay = 3500 * (SandboxMode.userCurrentWeight - SandboxMode.userDesiredWeight) / SandboxMode.userTimeExpected
+                mode.caloriesToGainPerDay = 3500 * (SandboxMode.userDesiredWeight - SandboxMode.userCurrentWeight) / SandboxMode.userTimeExpected
                 # print(mode.caloriesToGainPerDay)
                 if mode.caloriesToGainPerDay > 1000:
                     mode.daysMin = 3500 * (SandboxMode.userDesiredWeight - SandboxMode.userCurrentWeight) / 1000
