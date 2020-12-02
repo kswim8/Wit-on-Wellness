@@ -572,7 +572,7 @@ class Results(SandboxMode):
                     mode.daysMin = 3500 * (SandboxMode.userCurrentWeight - SandboxMode.userDesiredWeight) / 1000
                     mode.daysMax = 3500 * (SandboxMode.userCurrentWeight - SandboxMode.userDesiredWeight) / 500
                     canvas.create_text(515, 367, text='%0.1f' % mode.daysMin, font='Calibri 10 bold') # min days
-                    canvas.create_text(640, 367, text='%0.1f' % mode.daysMax, font='Calibri 10 bold') # max days
+                    canvas.create_text(638, 367, text='%0.1f' % mode.daysMax, font='Calibri 10 bold') # max days
                     canvas.create_text(380, 183, text=SandboxMode.userCurrentWeight, anchor='e', font='Calibri 10 bold') 
                     canvas.create_text(380, 266, text=SandboxMode.userDesiredWeight, anchor='e', font='Calibri 10 bold') 
                     canvas.create_line(390, 183, 640, 266)
@@ -584,9 +584,12 @@ class Results(SandboxMode):
                     mode.daysMax = SandboxMode.userTimeExpected
                     canvas.create_text(380, 183, text=SandboxMode.userCurrentWeight, anchor='e', font='Calibri 10 bold') 
                     canvas.create_text(380, 266, text=SandboxMode.userDesiredWeight, anchor='e', font='Calibri 10 bold')
-                    canvas.create_text(640, 367, text='%0.1f' % mode.daysMax, font='Calibri 10 bold') # max days
+                    canvas.create_text(638, 367, text='%0.1f' % mode.daysMax, font='Calibri 10 bold') # max days
                     canvas.create_line(390, 183, 640, 266)
-                    canvas.create_text(380, 450, text='You need to eat about\n%0.1f less calories per day\nto reach your goal.' % (mode.caloriesToLosePerDay), anchor='w', font='Calibri 12')
+                    if SandboxMode.totalCalories > SandboxMode.userTDEE - mode.caloriesToLosePerDay:
+                        canvas.create_text(380, 450, text='You need to eat about\n%0.1f less calories per day\nto reach your goal.' % (SandboxMode.totalCalories - SandboxMode.userTDEE - mode.caloriesToLosePerDay), anchor='w', font='Calibri 12')
+                    elif SandboxMode.totalCalories < SandboxMode.userTDEE - mode.caloriesToLosePerDay:
+                        canvas.create_text(380, 450, text='You need to eat about\n%0.1f more calories per day\nto reach your goal.' % (SandboxMode.userTDEE - SandboxMode.totalCalories - mode.caloriesToLosePerDay), anchor='w', font='Calibri 12')
                     canvas.create_text(380, 525, text='This means eating about\n%0.1f calories per day while\nexercising consistently!' % (SandboxMode.userTDEE - mode.caloriesToLosePerDay), anchor='w', font='Calibri 12')
                     # print("You need to eat about", mode.caloriesToLosePerDay, "less calories per day to reach your goal.")
                     # print("This means eating about", (SandboxMode.userTDEE - mode.caloriesToLosePerDay), "calories per day while exercising consistently!")
@@ -599,7 +602,7 @@ class Results(SandboxMode):
                     canvas.create_text(380, 183, text=SandboxMode.userDesiredWeight, anchor='e', font='Calibri 10 bold') 
                     canvas.create_text(380, 266, text=SandboxMode.userCurrentWeight, anchor='e', font='Calibri 10 bold') 
                     canvas.create_text(515, 367, text='%0.1f' % mode.daysMin, font='Calibri 10 bold') # min days
-                    canvas.create_text(640, 367, text='%0.1f' % mode.daysMax, font='Calibri 10 bold') # max days
+                    canvas.create_text(638, 367, text='%0.1f' % mode.daysMax, font='Calibri 10 bold') # max days
                     canvas.create_line(390, 266, 640, 183)
                     canvas.create_text(380, 450, text='Realistically, you should try to\ngain this weight in %0.1f to\n%0.1f days.' % (mode.daysMin, mode.daysMax), anchor='w')
                     canvas.create_text(380, 525, text='This means still eating at least\n%0.1f and at most %0.1f calories\nper day while exercising consistently\nfor healthy weight gain!' % (SandboxMode.userTDEE + 500, SandboxMode.userTDEE + 1000), anchor='w', font='Calibri 12')
@@ -607,11 +610,14 @@ class Results(SandboxMode):
                     # print("This means eating at most", (SandboxMode.userTDEE - 1000), "calories per day while exercising consistently for healthy weight gain!")
                 else:
                     mode.daysMax = SandboxMode.userTimeExpected
-                    canvas.create_text(380, 183, text=SandboxMode.userCurrentWeight, anchor='e', font='Calibri 10 bold') 
-                    canvas.create_text(380, 266, text=SandboxMode.userDesiredWeight, anchor='e', font='Calibri 10 bold')
-                    canvas.create_text(640, 367, text='%0.1f' % mode.daysMax, font='Calibri 10 bold') # max days
+                    canvas.create_text(380, 183, text=SandboxMode.userDesiredWeight, anchor='e', font='Calibri 10 bold') 
+                    canvas.create_text(380, 266, text=SandboxMode.userCurrentWeight, anchor='e', font='Calibri 10 bold')
+                    canvas.create_text(638, 367, text='%0.1f' % mode.daysMax, font='Calibri 10 bold') # max days
                     canvas.create_line(390, 266, 640, 183)
-                    canvas.create_text(380, 450, text='You need to eat about\n%0.1f more calories per day\nto reach your goal.' % (mode.caloriesToGainPerDay), anchor='w', font='Calibri 12')
+                    if SandboxMode.totalCalories > SandboxMode.userTDEE + mode.caloriesToGainPerDay:
+                        canvas.create_text(380, 450, text='You need to eat about\n%0.1f less calories per day\nto reach your goal.' % (SandboxMode.totalCalories - SandboxMode.userTDEE + mode.caloriesToGainPerDay), anchor='w', font='Calibri 12')
+                    elif SandboxMode.totalCalories < SandboxMode.userTDEE + mode.caloriesToGainPerDay:
+                        canvas.create_text(380, 450, text='You need to eat about\n%0.1f more calories per day\nto reach your goal.' % (SandboxMode.userTDEE - SandboxMode.totalCalories + mode.caloriesToGainPerDay), anchor='w', font='Calibri 12')
                     canvas.create_text(380, 525, text='This means eating about\n%0.1f calories per day while\nexercising consistently!' % (SandboxMode.userTDEE + mode.caloriesToGainPerDay), anchor='w', font='Calibri 12')
                     # print("You need to eat about", mode.caloriesToLosePerDay, "more calories per day to reach your goal.")
                     # print("This means eating about", (SandboxMode.userTDEE - mode.caloriesToLosePerDay), "calories per day while exercising consistently!")
@@ -626,8 +632,9 @@ class Results(SandboxMode):
         canvas.create_line(390, 100, 390, 350) # y axis (left)
         canvas.create_line(640, 100, 640, 350) # y axis (right)
 
-        canvas.create_text(380, 600, text='TDEE: %0.2f calories' % SandboxMode.userTDEE, font='Calibri 12 bold', anchor='w') # tdee
-        canvas.create_text(380, 675, text='TDEE (Total daily energy expenditure):\nhow many calories you are expected to burn.\nUsing this value, we can find how many more\nor less calories should be consumed to\ngain or lose weight. ', anchor='w')
+        canvas.create_text(380, 600, text='User Calories: %0.2f calories' % SandboxMode.totalCalories, font='Calibri 12 bold', anchor='w') # total Calories
+        canvas.create_text(380, 630, text='TDEE: %0.2f calories' % SandboxMode.userTDEE, font='Calibri 12 bold', anchor='w') # tdee
+        canvas.create_text(380, 685, text='TDEE (Total daily energy expenditure):\nhow many calories you are expected to burn.\nUsing this value, we can find how many more\nor less calories should be consumed to\ngain or lose weight. ', anchor='w')
         
         # canvas.create_text(380, 615, text='Expected Carbs: %0.2f' % (SandboxMode.userTDEE * 4), font='Calibri 10', anchor='w') # expected carbs
         # canvas.create_text(380, 630, text='Expected Protein: %0.2f' % (SandboxMode.totalProtein * 4), font='Calibri 10', anchor='w') # expected protein
