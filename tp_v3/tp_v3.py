@@ -21,6 +21,8 @@ class MyModalApp(ModalApp):
         app.puzzleMode = PuzzleMode()
         app.puzzleMode1 = PuzzleMode1()
         app.puzzleMode2 = PuzzleMode2()
+        app.chickfilaMenu = ChickFilA()
+        app.mcdonaldsMenu = McDonalds()
         app.instructions = Instructions()
         app.credits = Credits()
         app.setActiveMode(app.splashScreenMode)

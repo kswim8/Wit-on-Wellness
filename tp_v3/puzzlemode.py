@@ -5,6 +5,7 @@ class PuzzleMode(Mode):
     def appStarted(mode):
         mode.puzzle1 = False
         mode.puzzle2 = False
+       #  mode.puzzle1loadingmessage = False
 
     def keyPressed(mode, event):
         if (event.key == 'Escape'):
@@ -12,6 +13,7 @@ class PuzzleMode(Mode):
 
     def mousePressed(mode, event):
         if (0 <= event.x <= 200) and (0 <= event.y <= 375): 
+            # mode.puzzle1loadingmessage = True
             mode.app.setActiveMode(mode.app.puzzleMode1)
         elif (0 <= event.x <= 200) and (375 < event.y <= 750): 
             mode.app.setActiveMode(mode.app.puzzleMode2)
@@ -52,6 +54,8 @@ class PuzzleMode(Mode):
         if not (mode.puzzle1 or mode.puzzle2):
             canvas.create_text(2*mode.width/3, mode.height/2 - 200, text='Hover over one of\nthe puzzle choices\nto see what they are!', font='Calibri 20 bold')
             canvas.create_text(2*mode.width/3, mode.height/2 + 200, text='Click one of them\nwhen you are ready\nto play and learn!', font='Calibri 20 bold')
+        # if mode.puzzle1loadingmessage:
+        #     canvas.create_text(mode.width/2, 700, text='Loading...', font='Calibri 15 bold')
 
 # Puzzle 1: Highest Calorie Food
 class PuzzleMode1(PuzzleMode):
@@ -70,8 +74,6 @@ class PuzzleMode1(PuzzleMode):
     def keyPressed(mode, event):
         if (event.key == 'Escape'):
             mode.app.setActiveMode(mode.app.puzzleMode) 
-        if (event.key == 'A'):
-            mode.getFood()
     
     def mousePressed(mode, event):
         if (575 <= event.x <= 650):
@@ -104,6 +106,7 @@ class PuzzleMode1(PuzzleMode):
             PuzzleMode1.answerResponse = False
         if (550 <= event.x <= 650) and (700 <= event.y <= 750): # 550, 700, 650, 750
             PuzzleMode1.answerResponse = True
+            print(PuzzleMode1.randomizedFoodList)
             if PuzzleMode1.selectedItem == PuzzleMode1.randomizedFoodList[mode.highestCalorieFood][0]:
                 PuzzleMode1.answerBoxColor = 'green'
             else:
@@ -111,6 +114,7 @@ class PuzzleMode1(PuzzleMode):
 
         if (400 <= event.x <= 500) and (700 <= event.y <= 750): # 400, 700, 500, 750
             PuzzleMode1.randomizedFoodList = []
+            PuzzleMode1.calorieCounts = []
             PuzzleMode1.doOnceCounter = 0
             PuzzleMode1.answerBoxColor = 'yellow'
             PuzzleMode1.answerResponse = False
@@ -161,6 +165,7 @@ class PuzzleMode1(PuzzleMode):
             # print(PuzzleMode1.calorieCounts)
             # print(max(PuzzleMode1.calorieCounts))
             mode.highestCalorieFood = (PuzzleMode1.calorieCounts.index(max(PuzzleMode1.calorieCounts)))
+            print(mode.highestCalorieFood)
             # print(mode.highestCalorieFood)
             # print(PuzzleMode1.randomizedFoodList[mode.highestCalorieFood][0])
     
@@ -246,13 +251,77 @@ class PuzzleMode1(PuzzleMode):
 # Puzzle 2: Food Choice Optimization (LINEAR PROGRAMMING)
 class PuzzleMode2(PuzzleMode):
     def appStarted(mode):
-        pass
+        url = 'https://i.pinimg.com/originals/fe/f7/2f/fef72f73f4f961b4ed6f8e4bb093eb1b.jpg'
+        mode.appIcon = mode.loadImage(url)
+        mode.appIcon2 = mode.scaleImage(mode.appIcon, 4.5/10)
+        filename1 = 'chickfilalogo.png' # CITATION: https://myareanetwork-photos.s3.amazonaws.com/bizlist_photos/t/268981_1526986225.png
+        mode.chickfilaImage = mode.loadImage(filename1)
+        mode.chickfilaImage2 = mode.scaleImage(mode.chickfilaImage, 1)
+        filename2 = 'mcdonaldslogo.jpg' # CITATION: https://www.visitdanvillearea.com/wp-content/uploads/2015/08/McDonalds-Logo-square.jpg
+        mode.mcdonaldsImage = mode.loadImage(filename2)
+        mode.mcdonaldsImage2 = mode.scaleImage(mode.mcdonaldsImage, 0.95)
 
     def keyPressed(mode, event):
-        pass
+        if (event.key == 'Escape'):
+            mode.app.setActiveMode(mode.app.puzzleMode) 
 
     def mousePressed(mode, event):
-        pass
+        if ((mode.width/4 - 75 <= event.x <= mode.width/4 + 75) and (35 <= event.y <= 65)) or ((mode.width/4 - 100 <= event.x <= mode.width/4 + 100) and (670 <= event.y <= 700)): mode.app.setActiveMode(mode.app.chickfilaMenu)
+        elif ((3*mode.width/4 - 75 <= event.x <= 3*mode.width/4 + 75) and (35 <= event.y <= 65)) or ((3*mode.width/4 - 100 <= event.x <= 3*mode.width/4 + 100) and (670 <= event.y <= 700)): mode.app.setActiveMode(mode.app.mcdonaldsMenu)
 
     def redrawAll(mode, canvas):
+        canvas.create_image(mode.width/2, mode.height/2, image=ImageTk.PhotoImage(mode.appIcon2))
+        canvas.create_text(mode.width/2, 25, text='Puzzle 2: Food Choice Optimization', font='Calibri 20 bold') # puzzle mode 2 at the top
+        canvas.create_text(mode.width/2, 50, text='Given a restaurant menu, pick the combo of foods with the most calories, while under a spending limit and other constraints!', font='Calibri 9 bold') # RULES
+        # mcdonalds, CHICK-FIL-A logos
+        canvas.create_image(mode.width/4, mode.height/2 - 100, image=ImageTk.PhotoImage(mode.chickfilaImage2)) 
+        canvas.create_image(3*mode.width/4, mode.height/2 - 100, image=ImageTk.PhotoImage(mode.mcdonaldsImage2)) 
+
+        # CITATION: https://www.chick-fil-a.com/about/who-we-are#:~:text=%E2%80%9CTo%20glorify%20God%20by%20being,Chick%2Dfil%2DA.%E2%80%9D
+        canvas.create_text(mode.width/4, 3*mode.height/4,   text='"To glorify God by being a faithful steward\nof all that is entrusted to us and\nto have a positive influence on all\nwho come into contact with Chick-fil-A."', font='Calibri 12 bold')
+        # CITATION: https://www.grubstreet.com/2016/03/new-mcdonalds-slogan.html#:~:text=At%20least%20the%20Golden%20Arches,how%20on%20earth%20it's%20pronounced.
+        canvas.create_text(3*mode.width/4, 3*mode.height/4, text="\"I'm Lovin' It\"", font='Calibri 12 bold') 
+
+        canvas.create_rectangle(mode.width/4 - 100, 670, mode.width/4 + 100, 700, fill='white')
+        canvas.create_rectangle(3*mode.width/4 - 100, 670, 3*mode.width/4 + 100, 700, fill='white')
+        canvas.create_text(mode.width/4, 685, text='Use Chick-fil-A Menu', font='Calibri 15 bold')
+        canvas.create_text(3*mode.width/4, 685, text="Use McDonald's Menu", font='Calibri 15 bold')
+
+# Plan moving forward:
+'''
+1.  Puzzle Objective: Maximize calories, while having constraints on cost, certain macro/micro nutrients, and amounts.
+2.  Puzzle Objective: Solve for quantities of foods
+3.  Steps: Create a dictionary of foods and their calories, cost, and some macro/micros.
+4.  Steps: Create an objective function for calories (being maximized) and hardcode slack form in 2D list [ [ ], [ ], [ ], [ ] ]
+5.  Steps: Create a constraint on cost (quantity * food price) --> (total - quantity*foodprice - quantity*foodprice - quantity*foodprice, etc.)
+6.  Steps: Create a constraint on amounts (no greater than 5?) 
+7.  Steps: Create non negative constraints for all variables
+8.  Steps: Create multiple equations for restrictions on fat/protein/carbs (40 - (fat content of big mac) * quantity - (fat content of french fries) * quantity, etc.)
+9.  Algorithm: Use pivoting to solve for the max of the objective function, find tightest constraint, and replace and check for positive coefficients
+10. Algorithm: Iterate through the coefficients until no positive coefficients left (maximum obtained)
+'''
+class ChickFilA(PuzzleMode2):
+    def appStarted(mode):
         pass
+    
+    def keyPressed(mode, event):
+        if (event.key == 'Escape'):
+            mode.app.setActiveMode(mode.app.puzzleMode2)
+
+    def redrawAll(mode, canvas):
+        # CITATION: https://www.chick-fil-a.com/about/who-we-are#:~:text=%E2%80%9CTo%20glorify%20God%20by%20being,Chick%2Dfil%2DA.%E2%80%9D
+        canvas.create_text(mode.width/2, 25, text='Chick-fil-A Menu', font='Calibri 20 bold') # restaurant name
+        canvas.create_text(mode.width/2, 50, text='"To glorify God by being a faithful steward of all that is entrusted to us and to have a positive influence on all who come into contact with Chick-fil-A."', font='Calibri 7 bold') # slogan
+
+class McDonalds(PuzzleMode2):
+    def appStarted(mode):
+        pass
+    
+    def keyPressed(mode, event):
+        if (event.key == 'Escape'):
+            mode.app.setActiveMode(mode.app.puzzleMode2)
+    
+    def redrawAll(mode, canvas):
+        # CITATION: https://www-beta.mcdonaldsbread.com/en-us/food-values/who-we-are.html
+        canvas.create_text(mode.width/2, 25, text="McDonald's Menu", font='Calibri 20 bold') # restaurant name
+        canvas.create_text(mode.width/2, 50, text="\"I'm Lovin' It\"", font='Calibri 7 bold') # slogan
