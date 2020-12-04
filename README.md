@@ -13,7 +13,7 @@ If you don't have the necessary modules, the `module_manager.py` file will cover
 ## Using the App
 | Mode | Function |
 |---|---|
-|Sandbox Mode| This mode is where you can experiment with different food plans and receive feedback on your diet based on your goals. |
+|Sandbox| This mode is where you can experiment with different food plans and receive feedback on your diet based on your goals. |
 |Puzzle Mode| This mode is where you can try your hand at some puzzles related to calorie counting (easy) and food choice optimization (hard). |
 |Instructions| There is an instructions page for each mode that discusses their functions as well. |
 
