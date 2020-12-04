@@ -294,7 +294,7 @@ class PuzzleMode2(PuzzleMode):
 3.  Steps: Create a dictionary of foods and their calories, cost, and some macro/micros.
 4.  Steps: Create an objective function for calories (being maximized) and hardcode slack form in 2D list [ [ ], [ ], [ ], [ ] ]
 5.  Steps: Create a constraint on cost (quantity * food price) --> (total - quantity*foodprice - quantity*foodprice - quantity*foodprice, etc.)
-6.  Steps: Create a constraint on amounts (no greater than 5?) 
+6.  Steps: Create a constraint on fat and protein
 7.  Steps: Create non negative constraints for all variables
 8.  Steps: Create multiple equations for restrictions on fat/protein/carbs (40 - (fat content of big mac) * quantity - (fat content of french fries) * quantity, etc.)
 9.  Algorithm: Use pivoting to solve for the max of the objective function, find tightest constraint, and replace and check for positive coefficients
@@ -320,7 +320,7 @@ class McDonalds(PuzzleMode2):
     def keyPressed(mode, event):
         if (event.key == 'Escape'):
             mode.app.setActiveMode(mode.app.puzzleMode2)
-    
+
     def redrawAll(mode, canvas):
         # CITATION: https://www-beta.mcdonaldsbread.com/en-us/food-values/who-we-are.html
         canvas.create_text(mode.width/2, 25, text="McDonald's Menu", font='Calibri 20 bold') # restaurant name
