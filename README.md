@@ -20,7 +20,7 @@ If you don't have the necessary modules, the `module_manager.py` (courtesy of CM
 |Instructions| There is an instructions page for each mode that discusses their functions as well. |
 
 ## Simplex Algorithm
-As far as algorithmic complexity goes, the most algorithmically complex component of this term project was my implementation of the simplex algorithm from scratch with no modules. 
+As far as algorithmic complexity goes, the most algorithmically complex component of this term project was my **implementation of the simplex algorithm from scratch with no modules**. 
 
 Thanks to my mentor Alex Xie, who suggested this to me, and provided me a [Simplex Algorithm Video][simplex-video] to learn the algorithm in under 10 minutes, I was able to create optimized solutions for linear systems, otherwise known as linear programming. 
 
