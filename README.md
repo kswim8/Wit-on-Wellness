@@ -4,11 +4,12 @@ An Edutainment 15-112 Term Project by Keren Huang, intended to be the intersecti
 ## Table of Contents
 > 1. [Setup](#setup)
 > 2. [Using the App](#using-the-app)
+> 2. [Other Components](#other-components)
 
 ## Setup
-Download the zip file and run the file called `wit_on_wellness.py`.
+Download the zip file, extract the files, and run the file called `wit_on_wellness.py`.
 
-If you don't have the necessary modules, the `module_manager.py` file will cover the installations for you if you follow the steps in your terminal.
+If you don't have the necessary modules, the `module_manager.py` (courtesy of CMU 112) file will cover the installations for you if you follow the steps in your terminal.
 
 ## Using the App
 | Mode | Function |
@@ -16,4 +17,7 @@ If you don't have the necessary modules, the `module_manager.py` file will cover
 |Sandbox| This mode is where you can experiment with different food plans and receive feedback on your diet based on your goals. |
 |Puzzle Mode| This mode is where you can try your hand at some puzzles related to calorie counting (easy) and food choice optimization (hard). |
 |Instructions| There is an instructions page for each mode that discusses their functions as well. |
+
+## Other Components
+In the folder, you'll find images that were used in the project, as well as documentation for benchmarking each significant deadline for the term project.
 
