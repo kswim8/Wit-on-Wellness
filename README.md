@@ -6,7 +6,8 @@ An Edutainment 15-112 Term Project by Keren Huang, intended to be the intersecti
 > 2. [Shortcuts](#shortcuts)
 > 2. [Using the App](#using-the-app)
 > 3. [Simplex Algorithm](#simplex-algorithm)
-> 4. [Other Components](#other-components)
+> 4. [FoodData Central API](#fooddata-central-api)
+> 5. [Other Components](#other-components)
 
 ## Setup
 Download the zip file, extract the files, and run the file called `wit_on_wellness.py`.
@@ -42,7 +43,17 @@ The need for optimization comes in when we want to be able to maximize or minimi
 
 This algorithm is primarily utilized in Puzzle Mode --> **Puzzle 2: Food Choice Optimization**.
 
+## FoodData Central API
+The main API that this app pulls data from is the [FoodData Central API][api-guide].
+
+The [API endpoint][api-endpoint] I called was the `POST` request for `/foods/search` to returns a list of foods that matched search (query) keywords.
+
+*(CITATION: [https://github.com/USDA/USDA-APIs/issues/64][citation-link])*
+
 ## Other Components
 In the folder, you'll find images that were used in the project, as well as documentation for benchmarking each significant deadline for the term project.
 
 [simplex-video]: https://www.youtube.com/watch?v=RO5477EKlXE&ab_channel=OllieCrow
+[api-guide]: https://fdc.nal.usda.gov/api-guide.html
+[api-endpoint]: https://fdc.nal.usda.gov/api-spec/fdc_api.html#/FDC/postFoodsSearch
+[citation-link]: https://github.com/USDA/USDA-APIs/issues/64
