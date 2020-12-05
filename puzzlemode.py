@@ -611,7 +611,8 @@ class ChickFilA(PuzzleMode2):
         mode.displayFoods(canvas)
         solutiontoggle = 'See Solution'
         if mode.showsolution:
-            canvas.create_text(mode.width/2, 625, text='Solution: %0.4f calories, %0.4fg fat, %0.4fg protein, $%0.2f' % (ChickFilA.solution[0], ChickFilA.solution[1], ChickFilA.solution[2], ChickFilA.solution[3]))
+            # CITATION: https://stackoverflow.com/questions/45310254/fixed-digits-after-decimal-with-f-strings
+            canvas.create_text(mode.width/2, 625, text=f'Solution: {ChickFilA.solution[0]:0.4f} {mode.fooditem1name}, {ChickFilA.solution[1]:0.4f} {mode.fooditem2name}, {ChickFilA.solution[2]:0.4f} {mode.fooditem3name}')
             solutiontoggle = 'Close Solution'
         canvas.create_rectangle(0, mode.height - 50, 100, mode.height, fill='cyan')
         canvas.create_text(50, mode.height - 25, text='New Puzzle', font='Calibri 10')
@@ -934,7 +935,9 @@ class McDonalds(PuzzleMode2):
         mode.displayFoods(canvas)
         solutiontoggle = 'See Solution'
         if mode.showsolution:
-            canvas.create_text(mode.width/2, 625, text='Solution: %0.4f calories, %0.4fg fat, %0.4fg protein, $%0.2f' % (McDonalds.solution[0], McDonalds.solution[1], McDonalds.solution[2], McDonalds.solution[3]))
+            # CITATION: https://stackoverflow.com/questions/45310254/fixed-digits-after-decimal-with-f-strings
+            # f'{a:.2f}'
+            canvas.create_text(mode.width/2, 625, text=f'Solution: {McDonalds.solution[0]:0.4f} {mode.fooditem1name}, {McDonalds.solution[1]:0.4f} {mode.fooditem2name}, {McDonalds.solution[2]:0.4f} {mode.fooditem3name}')
             solutiontoggle = 'Close Solution'
         canvas.create_rectangle(0, mode.height - 50, 100, mode.height, fill='cyan')
         canvas.create_text(50, mode.height - 25, text='New Puzzle', font='Calibri 10')
