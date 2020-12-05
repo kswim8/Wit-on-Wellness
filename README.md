@@ -2,6 +2,7 @@
 An Edutainment 15-112 Term Project by Keren Huang, intended to be the intersection of computer science and nutrition. It is a good app to teach the basics of nutrition through calorie counting and tracking macronutrients. The app offers a Sandbox Mode for free testing and goal setting, as well as a Puzzle Mode for practice with nutrition skills.
 
 
+
 ## Table of Contents
 > 1. [Setup](#setup)
 > 2. [Shortcuts](#shortcuts)
@@ -9,6 +10,7 @@ An Edutainment 15-112 Term Project by Keren Huang, intended to be the intersecti
 > 3. [Simplex Algorithm](#simplex-algorithm)
 > 4. [FoodData Central API](#fooddata-central-api)
 > 5. [Other Components](#other-components)
+
 
 
 ## Setup
@@ -27,8 +29,10 @@ json              : module for parsing JSON into Python dictionaries
 ```
 
 
+
 ## Shortcuts
 You can use the `Esc` key on most "pages" of the application to go back to the previous pages.
+
 
 
 ## Using the App
@@ -37,6 +41,7 @@ You can use the `Esc` key on most "pages" of the application to go back to the p
 |Sandbox| This mode is where you can experiment with different food plans and receive feedback on your diet based on your goals. |
 |Puzzle Mode| This mode is where you can try your hand at some puzzles related to calorie counting (easy) and food choice optimization (hard). |
 |Instructions| There is an instructions page for each mode that discusses their functions as well. |
+
 
 
 ## Simplex Algorithm
@@ -49,12 +54,14 @@ The need for optimization comes in when we want to be able to maximize or minimi
 This algorithm is primarily utilized in Puzzle Mode --> **Puzzle 2: Food Choice Optimization**.
 
 
+
 ## FoodData Central API
 The main API that this app pulls data from is the [FoodData Central API][api-guide].
 
 The [API endpoint][api-endpoint] I called was the `POST` request for `/foods/search` to returns a list of foods that matched search (query) keywords.
 
 *(CITATION: [https://github.com/USDA/USDA-APIs/issues/64][citation-link])*
+
 
 
 ## Other Components
