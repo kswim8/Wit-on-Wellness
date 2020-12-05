@@ -305,15 +305,16 @@ class ChickFilA(PuzzleMode2):
         mode.totalFat = random.randrange(50, 80, 5)
         mode.totalProtein = random.randrange(30, 60, 5)
         mode.totalCost = random.randrange(20, 50, 5)
-        mode.chickfila_smallfoods = {   'Hash Browns': [240, -16, -2, -0.99],
-                                        'Icedream® Cone': [170, -4, -5, -1.25],
-                                        'Grilled Nuggets': [140, -3.5, -25, -3.75],
-                                        '1% Chocolate Milk': [150, -2.5, -7, -1.19],
-                                        '1% White Milk': [90, -2, -7, -1.19] }
-        mode.chickfila_bigfoods = {     'Chick-fil-A® Chicken Biscuit': [450, -21, -17, -2.19],
-                                        'Chick-n-Strips™': [350, -17, -28, -3.05],
-                                        'Cobb Salad': [510, -27, -40, -7.19],
-                                        'Bacon, Egg & Cheese Biscuit': [420, -21, -15, -2.59] }
+        # CITATION: https://www.fastfoodmenuprices.com/chick-fil-a-nutrition/
+        # CITATION: https://www.fastfoodmenuprices.com/chick-fil-a-prices/
+        mode.chickfila_smallfoods = {   'Hash Browns': [240, -16, -2, -0.99, 'https://www.cfacdn.com/img/order/COM/Menu_Refresh/Breakfast/Breakfast%20PDP/_0000s_0009_%5BFeed%5D_0000s_0028_Breakfast_Hashbrowns_2.png'],
+                                        'Icedream® Cone': [170, -4, -5, -1.25, 'https://www.cfacdn.com/img/order/COM/Menu_Refresh/Drinks/Drinks%20PDP/_0000s_0027_%5BFeed%5D_0006s_0013_Drinks_Ice-Dream.png'],
+                                        'Grilled Nuggets': [140, -3.5, -25, -3.75, 'https://www.cfacdn.com/img/order/menu/Online/Entrees/grilledNuggets_8ct_PDP.png'],
+                                        '1% White Milk': [90, -2, -7, -1.19, 'https://www.cfacdn.com/img/order/COM/Menu_Refresh/Drinks/Drinks%20PDP/_0000s_0020_%5BFeed%5D_0006s_0019_Drinks_Milk.png'] }
+        mode.chickfila_bigfoods = {     'Chick-fil-A® Chicken Biscuit': [450, -21, -17, -2.19, 'https://www.cfacdn.com/img/order/COM/Menu_Refresh/Breakfast/Breakfast%20Desktop/_0000s_0000_Stack620_0000_CFA_1605_60_Biscuit_Chicken_PROD_2155_1240px.png'],
+                                        'Chick-n-Strips™': [350, -17, -28, -3.05, 'https://www.cfacdn.com/img/order/menu/Online/Entrees/strips_3ct_PDP.png'],
+                                        'Cobb Salad': [510, -27, -40, -7.19, 'https://www.cfacdn.com/img/order/menu/Online/Salads%26wraps/cobbSalad_nug_pdp.png'],
+                                        'Bacon, Egg & Cheese Biscuit': [420, -21, -15, -2.59, 'https://www.cfacdn.com/img/order/COM/Menu_Refresh/Breakfast/Breakfast%20Desktop/_0000s_0008_Bacon-Egg-Cheese-Biscuit_620_PDP.png'] }
         mode.fooditem1name = random.choice(list(mode.chickfila_bigfoods))
         mode.fooditem2name = random.choice(list(mode.chickfila_smallfoods))
         mode.fooditem3name = random.choice(list(mode.chickfila_smallfoods))
@@ -325,6 +326,8 @@ class ChickFilA(PuzzleMode2):
         mode.fooditem3 = mode.chickfila_smallfoods[mode.fooditem3name]
         print(mode.fooditem1, mode.fooditem2, mode.fooditem3)
         mode.simplexAlgorithm()
+        mode.userFat = mode.userProtein = mode.userCalories = mode.userCost = 0
+        mode.food1Quantity = mode.food2Quantity = mode.food3Quantity = 0
     
     def keyPressed(mode, event):
         if (event.key == 'Escape'):
@@ -497,11 +500,99 @@ class ChickFilA(PuzzleMode2):
         print("FINAL SOLUTION:", solution)
         print("TOTAL CALORIES:", totalCalories)
 
+    def getCachedPhotoImage(mode, image):
+        # stores a cached version of the PhotoImage in the PIL/Pillow image
+        if ('cachedPhotoImage' not in image.__dict__):
+            image.cachedPhotoImage = ImageTk.PhotoImage(image)
+        return image.cachedPhotoImage
+
+    def displayFoods(mode, canvas):
+        resizedImage1 = mode.scaleImage(mode.loadImage(mode.fooditem1[4]), 0.15)
+        cachedResizedImage1 = mode.getCachedPhotoImage(resizedImage1)
+        canvas.create_image(100, 200, image=cachedResizedImage1)
+        canvas.create_text(200, 200 - 10, text=f'{mode.fooditem1name} | Price: ${abs(mode.fooditem1[3])}', anchor='w', font='Calibri 15 bold')
+        canvas.create_text(200, 200 + 10, text=f'Calories: {abs(mode.fooditem1[0])} cals | Fat: {abs(mode.fooditem1[1])}g | Protein: {abs(mode.fooditem1[2])}g', anchor='w')
+        resizedImage2 = mode.scaleImage(mode.loadImage(mode.fooditem2[4]), 0.15)
+        cachedResizedImage2 = mode.getCachedPhotoImage(resizedImage2)
+        canvas.create_image(100, 350, image=cachedResizedImage2)
+        canvas.create_text(200, 350 - 10, text=f'{mode.fooditem2name} | Price: ${abs(mode.fooditem2[3])}', anchor='w', font='Calibri 15 bold')
+        canvas.create_text(200, 350 + 10, text=f'Calories: {abs(mode.fooditem2[0])} cals | Fat: {abs(mode.fooditem2[1])}g | Protein: {abs(mode.fooditem2[2])}g', anchor='w')
+        resizedImage3 = mode.scaleImage(mode.loadImage(mode.fooditem3[4]), 0.15)
+        cachedResizedImage3 = mode.getCachedPhotoImage(resizedImage3)
+        canvas.create_image(100, 500, image=cachedResizedImage3)
+        canvas.create_text(200, 500 - 10, text=f'{mode.fooditem3name} | Price: ${abs(mode.fooditem3[3])}', anchor='w', font='Calibri 15 bold')
+        canvas.create_text(200, 500 + 10, text=f'Calories: {abs(mode.fooditem3[0])} cals | Fat: {abs(mode.fooditem3[1])}g | Protein: {abs(mode.fooditem3[2])}g', anchor='w')
+
+    def mousePressed(mode, event):
+        if (mode.width/2 - 100 <= event.x <= mode.width/2 + 100) and (mode.height - 50 <= event.y <= mode.height):
+            
+        elif (500 <= event.x <= 600):
+            if (205 <= event.y <= 225): 
+                mode.food1Quantity = mode.getUserInput("What quantity? (can be a float, but must be non negative)")
+                if mode.food1Quantity != None:
+                    mode.quantityReplaced = mode.food1Quantity.replace('.','', 1)
+                    while True:
+                        if mode.food1Quantity == 0: break
+                        elif mode.food1Quantity == None or not mode.quantityReplaced.isdigit() or float(mode.food1Quantity) > 100 or float(mode.food1Quantity) < 0:
+                            mode.food1Quantity = mode.getUserInput("How many servings?")
+                            if mode.food1Quantity != None:
+                                mode.quantityReplaced = mode.food1Quantity.replace('.','', 1)
+                        else:
+                            mode.food1Quantity = float(mode.food1Quantity)
+                            break
+                else:
+                    mode.food1Quantity = 0
+            elif (355 <= event.y <= 375):
+                mode.food2Quantity = mode.getUserInput("What quantity? (can be a float, but must be non negative)")
+                if mode.food2Quantity != None:
+                    mode.quantityReplaced = mode.food2Quantity.replace('.','', 1)
+                    while True:
+                        if mode.food2Quantity == 0: break
+                        elif mode.food2Quantity == None or not mode.quantityReplaced.isdigit() or float(mode.food2Quantity) > 100 or float(mode.food2Quantity) < 0:
+                            mode.food2Quantity = mode.getUserInput("How many servings?")
+                            if mode.food2Quantity != None:
+                                mode.quantityReplaced = mode.food2Quantity.replace('.','', 1)
+                        else:
+                            mode.food2Quantity = float(mode.food2Quantity)
+                            break
+                else:
+                    mode.food2Quantity = 0
+            elif (505 <= event.y <= 525):
+                mode.food3Quantity = mode.getUserInput("What quantity? (can be a float, but must be non negative)")
+                if mode.food3Quantity != None:
+                    mode.quantityReplaced = mode.food3Quantity.replace('.','', 1)
+                    while True:
+                        if mode.food3Quantity == 0: break
+                        elif mode.food3Quantity == None or not mode.quantityReplaced.isdigit() or float(mode.food3Quantity) > 50 or float(mode.food3Quantity) < 0:
+                            mode.food3Quantity = mode.getUserInput("How many servings?")
+                            if mode.food3Quantity != None:
+                                mode.quantityReplaced = mode.food3Quantity.replace('.','', 1)
+                        else:
+                            mode.food3Quantity = float(mode.food3Quantity)
+                            break
+                else:
+                    mode.food3Quantity = 0
+            mode.userCalories = abs(mode.fooditem1[0]) * mode.food1Quantity + abs(mode.fooditem2[0]) * mode.food2Quantity + abs(mode.fooditem3[0]) * mode.food3Quantity
+            mode.userFat = abs(mode.fooditem1[1]) * mode.food1Quantity + abs(mode.fooditem2[1]) * mode.food2Quantity + abs(mode.fooditem3[1]) * mode.food3Quantity
+            mode.userProtein = abs(mode.fooditem1[2]) * mode.food1Quantity + abs(mode.fooditem2[2]) * mode.food2Quantity + abs(mode.fooditem3[2]) * mode.food3Quantity
+            mode.userCost = abs(mode.fooditem1[3]) * mode.food1Quantity + abs(mode.fooditem2[3]) * mode.food2Quantity + abs(mode.fooditem3[3]) * mode.food3Quantity
 
     def redrawAll(mode, canvas):
         # CITATION: https://www.chick-fil-a.com/about/who-we-are#:~:text=%E2%80%9CTo%20glorify%20God%20by%20being,Chick%2Dfil%2DA.%E2%80%9D
         canvas.create_text(mode.width/2, 25, text='Chick-fil-A Menu', font='Calibri 20 bold') # restaurant name
         canvas.create_text(mode.width/2, 50, text='"To glorify God by being a faithful steward of all that is entrusted to us and to have a positive influence on all who come into contact with Chick-fil-A."', font='Calibri 7 bold') # slogan
+        canvas.create_text(mode.width/2, 75, text=f'Objective: maximize total calories, get <={mode.totalFat}g of fat, get <={mode.totalProtein}g of protein, and spend <= ${mode.totalCost}!')
+        # canvas.create_text(mode.width/2, 100, text=f'Current Input Results: {mode.userCalories} calories, {mode.userFat}g of fat, {mode.userProtein}g of protein, for ${mode.userCost}')
+        canvas.create_text(mode.width/2, 100, text='Current Input Results: %0.2f calories, %0.2fg of fat, %0.2fg of protein, for $%0.2f' % (mode.userCalories, mode.userFat, mode.userProtein, mode.userCost))
+        mode.displayFoods(canvas)
+        canvas.create_rectangle(500, 200 + 5, 600, 200 + 25, fill='cyan')
+        canvas.create_text(550, 215, text='Change Quantity', font='Calibri 10')
+        canvas.create_rectangle(500, 350 + 5, 600, 350 + 25, fill='cyan')
+        canvas.create_text(550, 365, text='Change Quantity', font='Calibri 10')
+        canvas.create_rectangle(500, 500 + 5, 600, 500 + 25, fill='cyan')
+        canvas.create_text(550, 515, text='Change Quantity', font='Calibri 10')
+        canvas.create_rectangle(mode.width/2 - 100, mode.height - 50, mode.width/2 + 100, mode.height, fill='cyan')
+        canvas.create_text(mode.width/2, 725, text='Check Answer', font='Calibri 10')
 
 class McDonalds(PuzzleMode2):
     def appStarted(mode):
