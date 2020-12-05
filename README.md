@@ -67,6 +67,8 @@ The [API endpoint][api-endpoint] I called was the `POST` request for `/foods/sea
 ## Other Components
 In the folder, you'll find images that were used in the project, as well as documentation for benchmarking each significant deadline for the term project.
 
+In the folders within the folder, the files in those folders are test files for different optimization methods, prototyping, and the module tech demo.
+
 [simplex-video]: https://www.youtube.com/watch?v=RO5477EKlXE&ab_channel=OllieCrow
 [api-guide]: https://fdc.nal.usda.gov/api-guide.html
 [api-endpoint]: https://fdc.nal.usda.gov/api-spec/fdc_api.html#/FDC/postFoodsSearch
