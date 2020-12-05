@@ -9,9 +9,10 @@ def getrandomfood():
         print(randomfood)
 
 
-def testFoodAPI(userinput):
+def testFoodAPI():
     while True:
         # take a user input
+        userinput = input("What did you eat or drink today? ")
 
         # CITATION: https://github.com/USDA/USDA-APIs/issues/64
         # pulling food data from the API
@@ -68,12 +69,7 @@ def testFoodAPI(userinput):
                 foodimageurl = firstimage[srcindex:-3] # parsing for url of image   
                 foodFullDict[foodname] = [foodFullDict[foodname], firstimage[srcindex:-3]]
 
-        # print(foodFullDict)
-        randomFoods = ['apple', 'orange', 'cereal', 'chicken', 'nuts', 'fruit']
-        for i in range(len(randomFoods)):
-            testFoodAPI(randomFoods[i])
-            randomfood = random.choice(list(foodFullDict))
-            print(randomfood)
+        print(foodFullDict)
 
 testFoodAPI()
 
@@ -81,16 +77,7 @@ testFoodAPI()
 
 
 
-
-
-
-
-
-
-
-
-
-def getFoodDict(mode, userinput):
+def getFoodDict(userinput):
         # CITATION: https://github.com/USDA/USDA-APIs/issues/64
         # pulling food data from the API
         params = {'api_key': 'xva7eCmcY6On4IRr0o28hpJJLJpQXC1nYebWx4Wa'}

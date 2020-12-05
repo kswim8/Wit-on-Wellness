@@ -290,21 +290,28 @@ class SandboxMode(Mode):
                 mode.app.showMessage(f"Could not find a food or drink labeled {userinput}, please try again.")
             # otherwise, there's probably some single or <10 elements
 
+        print(mode.foodFullDict)
         # CITATION: https://stackoverflow.com/questions/21530274/format-for-a-url-that-goes-to-google-image-search
         # web scrape for the image
         picCy = 25 # embed the locations of where they will be placed using picCy
         for foodname in foodset:
-            imagerequest = requests.get(f'https://www.google.com/search?tbm=isch&q={foodname}%20food%20or%20drink')
-            soup = bs4.BeautifulSoup(imagerequest.text, 'html.parser')
-            firstimage = soup.find_all("img")[1]
-            firstimage = str(firstimage)
-            srcindex = firstimage.find('http')      # parsing for start of link
-            foodimageurl = firstimage[srcindex:-3]  # slicing for url of image   
-            mode.foodFullDict[foodname] = [mode.foodFullDict[foodname], firstimage[srcindex:-3], picCy] # assign value to key
-            mode.foodFullDictCoords[foodname] = picCy
-            picCy += 75    
+            try:
+                imagerequest = requests.get(f'https://www.google.com/search?tbm=isch&q={foodname}%20food%20or%20drink')
+                soup = bs4.BeautifulSoup(imagerequest.text, 'html.parser')
+                firstimage = soup.find_all("img")[1]
+                firstimage = str(firstimage)
+                srcindex = firstimage.find('http')      # parsing for start of link
+                foodimageurl = firstimage[srcindex:-3]  # slicing for url of image   
+                # print("THE DICT:", mode.foodFullDict[foodname])
+                # print("THE IMAGE URL:", firstimage[srcindex:-3])
+                # print("THE FOODNAME:", foodname)
+                mode.foodFullDict[foodname] = [mode.foodFullDict[foodname], firstimage[srcindex:-3], picCy] # assign value to key
+                mode.foodFullDictCoords[foodname] = picCy
+                picCy += 75   
+            except:
+                pass 
 
-        print(mode.foodFullDict) # final food dict with macros + image url
+        # print(mode.foodFullDict) # final food dict with macros + image url
     
     def redrawAll(mode, canvas):
         if not mode.userList:

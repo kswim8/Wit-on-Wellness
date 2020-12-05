@@ -10,7 +10,7 @@ class PuzzleMode(Mode):
     def appStarted(mode):
         mode.puzzle1 = False
         mode.puzzle2 = False
-       #  mode.puzzle1loadingmessage = False
+        # mode.puzzle1loadingmessage = False
 
     def keyPressed(mode, event):
         if (event.key == 'Escape'):
@@ -111,7 +111,7 @@ class PuzzleMode1(PuzzleMode):
             PuzzleMode1.answerResponse = False
         if (550 <= event.x <= 650) and (700 <= event.y <= 750): # 550, 700, 650, 750
             PuzzleMode1.answerResponse = True
-            print(PuzzleMode1.randomizedFoodList)
+            # print(PuzzleMode1.randomizedFoodList)
             if PuzzleMode1.selectedItem == PuzzleMode1.randomizedFoodList[mode.highestCalorieFood][0]:
                 PuzzleMode1.answerBoxColor = 'green'
             else:
@@ -170,7 +170,7 @@ class PuzzleMode1(PuzzleMode):
             # print(PuzzleMode1.calorieCounts)
             # print(max(PuzzleMode1.calorieCounts))
             mode.highestCalorieFood = (PuzzleMode1.calorieCounts.index(max(PuzzleMode1.calorieCounts)))
-            print(mode.highestCalorieFood)
+            # print(mode.highestCalorieFood)
             # print(mode.highestCalorieFood)
             # print(PuzzleMode1.randomizedFoodList[mode.highestCalorieFood][0])
     
@@ -329,11 +329,11 @@ class ChickFilA(PuzzleMode2):
         mode.fooditem3name = random.choice(list(mode.chickfila_smallfoods))
         while mode.fooditem2name == mode.fooditem3name:
             mode.fooditem3name = random.choice(list(mode.chickfila_smallfoods))
-        print(mode.fooditem1name, mode.fooditem2name, mode.fooditem3name)
+        # print(mode.fooditem1name, mode.fooditem2name, mode.fooditem3name)
         mode.fooditem1 = mode.chickfila_bigfoods[mode.fooditem1name]
         mode.fooditem2 = mode.chickfila_smallfoods[mode.fooditem2name]
         mode.fooditem3 = mode.chickfila_smallfoods[mode.fooditem3name]
-        print(mode.fooditem1, mode.fooditem2, mode.fooditem3)
+        # print(mode.fooditem1, mode.fooditem2, mode.fooditem3)
         mode.simplexAlgorithm()
         mode.userFat = mode.userProtein = mode.userCalories = mode.userCost = 0
         mode.food1Quantity = mode.food2Quantity = mode.food3Quantity = 0
@@ -510,8 +510,8 @@ class ChickFilA(PuzzleMode2):
 
         totalCalories = slackForm[0][0]
         ChickFilA.solution = solution
-        print("FINAL SOLUTION:", solution)
-        print("TOTAL CALORIES:", totalCalories)
+        # print("FINAL SOLUTION:", solution)
+        # print("TOTAL CALORIES:", totalCalories)
 
     def getCachedPhotoImage(mode, image):
         # stores a cached version of the PhotoImage in the PIL/Pillow image
@@ -542,10 +542,10 @@ class ChickFilA(PuzzleMode2):
             mode.fatDifference = ChickFilA.solution[0] - mode.food1Quantity
             mode.proteinDifference = ChickFilA.solution[1] - mode.food2Quantity
             mode.costDifference = ChickFilA.solution[2] - mode.food3Quantity
-            print("Differences:", mode.fatDifference, mode.proteinDifference, mode.costDifference)
+            # print("Differences:", mode.fatDifference, mode.proteinDifference, mode.costDifference)
             mode.mean_squared_error = (mode.fatDifference**2 + mode.proteinDifference**2 + mode.costDifference**2) / 3
-            print("SOLUTION:", ChickFilA.solution)
-            print("THE MSE IS:", mode.mean_squared_error)
+            # print("SOLUTION:", ChickFilA.solution)
+            # print("THE MSE IS:", mode.mean_squared_error)
         elif (0 <= event.x <= 100) and (mode.height - 50 <= event.y <= mode.height):
             mode.appStarted()
         elif (550 <= event.x <= 650) and (mode.height - 50 <= event.y <= mode.height):
@@ -653,11 +653,11 @@ class McDonalds(PuzzleMode2):
         mode.fooditem3name = random.choice(list(mode.mcdonalds_smallfoods))
         while mode.fooditem2name == mode.fooditem3name:
             mode.fooditem3name = random.choice(list(mode.mcdonalds_smallfoods))
-        print(mode.fooditem1name, mode.fooditem2name, mode.fooditem3name)
+        # print(mode.fooditem1name, mode.fooditem2name, mode.fooditem3name)
         mode.fooditem1 = mode.mcdonalds_bigfoods[mode.fooditem1name]
         mode.fooditem2 = mode.mcdonalds_smallfoods[mode.fooditem2name]
         mode.fooditem3 = mode.mcdonalds_smallfoods[mode.fooditem3name]
-        print(mode.fooditem1, mode.fooditem2, mode.fooditem3)
+        # print(mode.fooditem1, mode.fooditem2, mode.fooditem3)
         mode.simplexAlgorithm()
         mode.userFat = mode.userProtein = mode.userCalories = mode.userCost = 0
         mode.food1Quantity = mode.food2Quantity = mode.food3Quantity = 0
@@ -833,8 +833,8 @@ class McDonalds(PuzzleMode2):
 
         totalCalories = slackForm[0][0]
         McDonalds.solution = solution
-        print("FINAL SOLUTION:", solution)
-        print("TOTAL CALORIES:", totalCalories)
+        # print("FINAL SOLUTION:", solution)
+        # print("TOTAL CALORIES:", totalCalories)
 
     def getCachedPhotoImage(mode, image):
         # stores a cached version of the PhotoImage in the PIL/Pillow image
@@ -865,10 +865,10 @@ class McDonalds(PuzzleMode2):
             mode.fatDifference = McDonalds.solution[0] - mode.food1Quantity
             mode.proteinDifference = McDonalds.solution[1] - mode.food2Quantity
             mode.costDifference = McDonalds.solution[2] - mode.food3Quantity
-            print("Differences:", mode.fatDifference, mode.proteinDifference, mode.costDifference)
+            # print("Differences:", mode.fatDifference, mode.proteinDifference, mode.costDifference)
             mode.mean_squared_error = (mode.fatDifference**2 + mode.proteinDifference**2 + mode.costDifference**2) / 3
-            print("SOLUTION:", McDonalds.solution)
-            print("THE MSE IS:", mode.mean_squared_error)
+            # print("SOLUTION:", McDonalds.solution)
+            # print("THE MSE IS:", mode.mean_squared_error)
         elif (0 <= event.x <= 100) and (mode.height - 50 <= event.y <= mode.height):
             mode.appStarted()
         elif (550 <= event.x <= 650) and (mode.height - 50 <= event.y <= mode.height):

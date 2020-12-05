@@ -15,7 +15,7 @@ from sandbox import *
 from puzzlemode import *
 from creditspage import *
 
-class MyModalApp(ModalApp):
+class WitOnWellness(ModalApp):
     def appStarted(app):
         app.splashScreenMode = SplashScreenMode()
         app.sandboxMode = SandboxMode()
@@ -30,4 +30,4 @@ class MyModalApp(ModalApp):
         app.setActiveMode(app.splashScreenMode)
         app.timerDelay = 50
 
-app = MyModalApp(width=650, height=750)
+app = WitOnWellness(width=650, height=750)
