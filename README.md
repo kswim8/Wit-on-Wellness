@@ -1,5 +1,5 @@
 # Wit on Wellness (WoW)
-An Edutainment 15-112 Term Project by Keren Huang, intended to be the intersection of computer science and nutrition. It is a good app to teach the basics of nutrition through calorie counting and tracking macronutrients. The app offers a Sandbox Mode for free testing and goal setting, as well as a Puzzle Mode for practice with nutrition skills.
+An Edutainment 15-112 Term Project by **Keren Huang**, intended to be the intersection of computer science and nutrition. It is a good app to teach the basics of nutrition through calorie counting and tracking macronutrients. The app offers a Sandbox Mode for free testing and goal setting, as well as a Puzzle Mode for practice with nutrition skills.
 
 
 
@@ -47,7 +47,7 @@ You can use the `Esc` key on most "pages" of the application to go back to the p
 ## Simplex Algorithm
 As far as algorithmic complexity goes, the most algorithmically complex component of this term project was my **implementation of the simplex algorithm from scratch with no modules**. 
 
-Thanks to my mentor Alex Xie, who suggested this to me, and provided me a [Simplex Algorithm Video][simplex-video] to learn the algorithm in under 10 minutes, I was able to create optimized solutions for linear systems, otherwise known as linear programming. 
+Thanks to my mentor **Alex Xie**, who suggested this to me, and provided me a [Simplex Algorithm Video][simplex-video] to learn the algorithm in under 10 minutes, I was able to create optimized solutions for linear systems, otherwise known as linear programming. 
 
 The need for optimization comes in when we want to be able to maximize or minimize a value given linear constraints, such as finding the max calories given a spending limit and cap on fat and protein in my app. 
 
