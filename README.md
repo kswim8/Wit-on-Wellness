@@ -38,7 +38,9 @@ As far as algorithmic complexity goes, the most algorithmically complex componen
 
 Thanks to my mentor Alex Xie, who suggested this to me, and provided me a [Simplex Algorithm Video][simplex-video] to learn the algorithm in under 10 minutes, I was able to create optimized solutions for linear systems, otherwise known as linear programming. 
 
-This algorithm is primarily utilized in Puzzle Mode --> Puzzle 2: Food Choice Optimization.
+The need for optimization comes in when we want to be able to maximize or minimize a value given linear constraints, such as finding the max calories given a spending limit and cap on fat and protein in my app. 
+
+This algorithm is primarily utilized in Puzzle Mode --> **Puzzle 2: Food Choice Optimization**.
 
 ## Other Components
 In the folder, you'll find images that were used in the project, as well as documentation for benchmarking each significant deadline for the term project.
