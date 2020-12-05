@@ -299,6 +299,8 @@ class PuzzleMode2(PuzzleMode):
 8.  Steps: Create multiple equations for restrictions on fat/protein/carbs (40 - (fat content of big mac) * quantity - (fat content of french fries) * quantity, etc.)
 9.  Algorithm: Use pivoting to solve for the max of the objective function, find tightest constraint, and replace and check for positive coefficients
 10. Algorithm: Iterate through the coefficients until no positive coefficients left (maximum obtained)
+11. Special Case: In the case that the tightest constraint is on an equation that's already been rearranged, this pivot goes through and essentially eliminates the
+    previous basic variable that was "moved to the left" because this means a higher maximum can be achieved, which effectively eliminates the other basic variable.
 '''
 class ChickFilA(PuzzleMode2):
     solution = []
@@ -308,6 +310,7 @@ class ChickFilA(PuzzleMode2):
         mode.totalCost = random.randrange(20, 50, 5)
         # CITATION: https://www.fastfoodmenuprices.com/chick-fil-a-nutrition/
         # CITATION: https://www.fastfoodmenuprices.com/chick-fil-a-prices/
+        # CITATION: These images are attached to links from where I pulled them; the following is my citation.
         mode.chickfila_smallfoods = {   'Hash Browns': [240, -16, -2, -0.99, 'https://www.cfacdn.com/img/order/COM/Menu_Refresh/Breakfast/Breakfast%20PDP/_0000s_0009_%5BFeed%5D_0000s_0028_Breakfast_Hashbrowns_2.png'],
                                         'Icedream® Cone': [170, -4, -5, -1.25, 'https://www.cfacdn.com/img/order/COM/Menu_Refresh/Drinks/Drinks%20PDP/_0000s_0027_%5BFeed%5D_0006s_0013_Drinks_Ice-Dream.png'],
                                         'Grilled Nuggets': [140, -3.5, -25, -3.75, 'https://www.cfacdn.com/img/order/menu/Online/Entrees/grilledNuggets_8ct_PDP.png'],
@@ -337,6 +340,7 @@ class ChickFilA(PuzzleMode2):
             mode.app.setActiveMode(mode.app.puzzleMode2)
     
     def simplexAlgorithm(mode):
+        # CITATION: https://youtu.be/RO5477EKlXE
         mode.totalCalories =    0
         solution =         [0, 0, 0, mode.totalFat, mode.totalProtein, mode.totalCost]
 
@@ -630,6 +634,7 @@ class McDonalds(PuzzleMode2):
         mode.totalCost = random.randrange(20, 50, 5)
         # CITATION: https://www.fastfoodmenuprices.com/mcdonalds-nutrition/
         # CITATION: https://www.fastfoodmenuprices.com/mcdonalds-prices/
+        # CITATION: These images are attached to links from where I pulled them; the following is my citation.
         mode.mcdonalds_smallfoods = {   'Hash Brown': [240, -16, -2, -0.99, 'https://www.mcdonalds.com/is/image/content/dam/uk/nfl/nutrition/nfl-product/product/products/mcdonalds-Hash-Brown.jpg'],
                                         'Chicken McNuggets® (6 piece)': [280, -18, -13, -4.49, 'https://www.mcdonalds.com/is/image/content/dam/uk/nfl/nutrition/nfl-product/product/products/mcdonalds-Chicken-McNuggets-6-pieces.jpg'],
                                         'Premium Bacon Ranch Salad': [140, -7, -9, -4.59, 'https://www.mcdonalds.com/content/dam/usa/nfl/nutrition/items/regular/desktop/t-mcdonalds-Premium-Bacon-Ranch-Salad-with-Grilled-Chicken.jpg'],

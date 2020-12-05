@@ -3,6 +3,7 @@ import random, requests, bs4, json
 
 class SplashScreenMode(Mode):
     def appStarted(mode):
+        # CITATION: https://i.pinimg.com/originals/fe/f7/2f/fef72f73f4f961b4ed6f8e4bb093eb1b.jpg
         url = 'https://i.pinimg.com/originals/fe/f7/2f/fef72f73f4f961b4ed6f8e4bb093eb1b.jpg'
         mode.appIcon = mode.loadImage(url)
         mode.appIcon2 = mode.scaleImage(mode.appIcon, 4.5/10)
