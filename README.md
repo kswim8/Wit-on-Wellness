@@ -1,8 +1,9 @@
 # Wit on Wellness (WoW)
-An Edutainment 15-112 Term Project by Keren Huang, intended to be the intersection of computer science and nutrition.
+An Edutainment 15-112 Term Project by Keren Huang, intended to be the intersection of computer science and nutrition. It is a good app to teach the basics of nutrition through calorie counting and tracking macronutrients. The app offers a Sandbox Mode for free testing and goal setting, as well as a Puzzle Mode for practice with nutrition skills.
 
 ## Table of Contents
 > 1. [Setup](#setup)
+> 2. [Shortcuts](#shortcuts)
 > 2. [Using the App](#using-the-app)
 > 3. [Simplex Algorithm](#simplex-algorithm)
 > 4. [Other Components](#other-components)
@@ -11,6 +12,19 @@ An Edutainment 15-112 Term Project by Keren Huang, intended to be the intersecti
 Download the zip file, extract the files, and run the file called `wit_on_wellness.py`.
 
 If you don't have the necessary modules, the `module_manager.py` (courtesy of CMU 112) file will cover the installations for you if you follow the steps in your terminal.
+
+The following modules and libraries were used: 
+```
+module_manager    : CMU-provided file for ease of installing new modules
+cmu_112_graphics  : CMU-provided framework for built-in graphics and animations methods
+random            : module for creating pseudo-random number generators
+requests          : module for sending HTTP requests to the API to pull data
+bs4               : module for webscraping and collecting images
+json              : module for parsing JSON into Python dictionaries
+```
+
+## Shortcuts
+You can use the `Esc` key on most "pages" of the application to go back to the previous pages.
 
 ## Using the App
 | Mode | Function |
