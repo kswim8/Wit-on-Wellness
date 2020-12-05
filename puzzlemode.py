@@ -301,6 +301,7 @@ class PuzzleMode2(PuzzleMode):
 10. Algorithm: Iterate through the coefficients until no positive coefficients left (maximum obtained)
 '''
 class ChickFilA(PuzzleMode2):
+    solution = []
     def appStarted(mode):
         mode.totalFat = random.randrange(50, 80, 5)
         mode.totalProtein = random.randrange(30, 60, 5)
@@ -328,6 +329,7 @@ class ChickFilA(PuzzleMode2):
         mode.simplexAlgorithm()
         mode.userFat = mode.userProtein = mode.userCalories = mode.userCost = 0
         mode.food1Quantity = mode.food2Quantity = mode.food3Quantity = 0
+        mode.mean_squared_error = 8888
     
     def keyPressed(mode, event):
         if (event.key == 'Escape'):
@@ -497,6 +499,7 @@ class ChickFilA(PuzzleMode2):
             if tightestConstraintC == tightestConstraintB: solution[1] = 0
 
         totalCalories = slackForm[0][0]
+        ChickFilA.solution = solution
         print("FINAL SOLUTION:", solution)
         print("TOTAL CALORIES:", totalCalories)
 
@@ -525,7 +528,16 @@ class ChickFilA(PuzzleMode2):
 
     def mousePressed(mode, event):
         if (mode.width/2 - 100 <= event.x <= mode.width/2 + 100) and (mode.height - 50 <= event.y <= mode.height):
-            
+            # check answer and use mean squared error
+            mode.fatDifference = ChickFilA.solution[0] - mode.food1Quantity
+            mode.proteinDifference = ChickFilA.solution[1] - mode.food2Quantity
+            mode.costDifference = ChickFilA.solution[2] - mode.food3Quantity
+            print("Differences:", mode.fatDifference, mode.proteinDifference, mode.costDifference)
+            mode.mean_squared_error = (mode.fatDifference**2 + mode.proteinDifference**2 + mode.costDifference**2) / 3
+            print("SOLUTION:", ChickFilA.solution)
+            print("THE MSE IS:", mode.mean_squared_error)
+        elif (0 <= event.x <= 100) and (mode.height - 50 <= event.y <= mode.height):
+            mode.appStarted()
         elif (500 <= event.x <= 600):
             if (205 <= event.y <= 225): 
                 mode.food1Quantity = mode.getUserInput("What quantity? (can be a float, but must be non negative)")
@@ -585,14 +597,20 @@ class ChickFilA(PuzzleMode2):
         # canvas.create_text(mode.width/2, 100, text=f'Current Input Results: {mode.userCalories} calories, {mode.userFat}g of fat, {mode.userProtein}g of protein, for ${mode.userCost}')
         canvas.create_text(mode.width/2, 100, text='Current Input Results: %0.2f calories, %0.2fg of fat, %0.2fg of protein, for $%0.2f' % (mode.userCalories, mode.userFat, mode.userProtein, mode.userCost))
         mode.displayFoods(canvas)
+        canvas.create_rectangle(0, mode.height - 50, 100, mode.height, fill='cyan')
+        canvas.create_text(50, mode.height - 25, text='New Puzzle', font='Calibri 10')
         canvas.create_rectangle(500, 200 + 5, 600, 200 + 25, fill='cyan')
         canvas.create_text(550, 215, text='Change Quantity', font='Calibri 10')
+        canvas.create_text(550, 235, text='Current Quantity: %0.4f' % mode.food1Quantity, font='Calibri 10')
         canvas.create_rectangle(500, 350 + 5, 600, 350 + 25, fill='cyan')
         canvas.create_text(550, 365, text='Change Quantity', font='Calibri 10')
+        canvas.create_text(550, 385, text='Current Quantity: %0.4f' % mode.food2Quantity, font='Calibri 10')
         canvas.create_rectangle(500, 500 + 5, 600, 500 + 25, fill='cyan')
         canvas.create_text(550, 515, text='Change Quantity', font='Calibri 10')
+        canvas.create_text(550, 535, text='Current Quantity: %0.4f' % mode.food3Quantity, font='Calibri 10')
         canvas.create_rectangle(mode.width/2 - 100, mode.height - 50, mode.width/2 + 100, mode.height, fill='cyan')
         canvas.create_text(mode.width/2, 725, text='Check Answer', font='Calibri 10')
+        canvas.create_text(mode.width/2, 650, text='Mean-Squared Error (how far you are from the optimized solution, 0 is the best score!): %0.04f' % mode.mean_squared_error, font='Calibri 11 bold')
 
 class McDonalds(PuzzleMode2):
     def appStarted(mode):
