@@ -1,3 +1,5 @@
+# This is a page where you can enjoy pictures of me and Alex who helped to make this app.
+
 from cmu_112_graphics import *
 import random, requests, bs4, json
 

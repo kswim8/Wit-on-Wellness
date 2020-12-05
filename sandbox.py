@@ -1,3 +1,7 @@
+# This Sandbox Mode is used for user freedom to experiment with different diets
+# and food/meal plans. They can also receive feedback and results on the meal plan
+# based on goals that they input at the beginning of using Sandbox.
+
 from cmu_112_graphics import *
 import random, requests, bs4, json
 

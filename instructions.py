@@ -1,3 +1,6 @@
+# This is the Instructions page, which is linked to the other modes as well.
+# It mainly describes each mode while showing screenshots of the modes.
+
 from cmu_112_graphics import *
 import random, requests, bs4, json
 

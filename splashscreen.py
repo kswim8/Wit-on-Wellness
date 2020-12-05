@@ -1,3 +1,6 @@
+# This is the landing and splash screen for the app, where the user can pick their path.
+# There are options for Sandbox, Puzzle Mode, or Instructions if they would like.
+
 from cmu_112_graphics import *
 import random, requests, bs4, json
 

@@ -1,5 +1,7 @@
 # Keren Huang Term Project
 
+# This is the main file that is run and opens the GUI.
+
 # CITATION: https://www.cs.cmu.edu/~112/notes/notes-animations-part3.html#subclassingModalApp
 # CITATION: https://www.cs.cmu.edu/~112/notes/notes-animations-part3.html#installingModules
 

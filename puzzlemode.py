@@ -1,3 +1,8 @@
+# This is the Puzzle Mode that contains the two puzzles for the app. 
+# Puzzle 1 is calorie counting, or identifying the food with the highest calorie count.
+# Puzzle 2 is optimization and trying to find the right quantities and combination
+# of foods that will meet the constraints while maximizing calories.
+
 from cmu_112_graphics import *
 import random, requests, bs4, json
 
