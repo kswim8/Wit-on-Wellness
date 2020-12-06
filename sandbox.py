@@ -2,6 +2,8 @@
 # and food/meal plans. They can also receive feedback and results on the meal plan
 # based on goals that they input at the beginning of using Sandbox.
 
+# CITATION: https://www.cs.cmu.edu/~112/notes/notes-animations-part3.html#subclassingModalApp 
+# CITATION: https://www.cs.cmu.edu/~112/notes/notes-animations-part3.html#cachingPhotoImages
 from cmu_112_graphics import *
 import random, requests, bs4, json
 
@@ -26,6 +28,7 @@ class SandboxMode(Mode):
         mode.userfoodcounter = 0
 
     def takeUserInputData(mode):
+        # CITATION: https://steelfitusa.com/2018/10/calculate-tdee/
         mode.userGender = mode.getUserInput("What is your biological/current gender (M/F) ?")
         while True:
             if mode.userGender == None or (mode.userGender).upper() != 'M' and (mode.userGender).upper() != 'F':
@@ -296,6 +299,8 @@ class SandboxMode(Mode):
         picCy = 25 # embed the locations of where they will be placed using picCy
         for foodname in foodset:
             try:
+                # CITATION: It is infeasible to cite every image here because the web scraping and photo used is determined by user input, which has millions of possibilities.
+                # To explain this part of the code, I webscrape from Google Images and take the first image every time for each listed food returned by the API (in foodset)
                 imagerequest = requests.get(f'https://www.google.com/search?tbm=isch&q={foodname}%20food%20or%20drink')
                 soup = bs4.BeautifulSoup(imagerequest.text, 'html.parser')
                 firstimage = soup.find_all("img")[1]
@@ -430,7 +435,7 @@ class Results(SandboxMode):
             mode.proteinBar = [mode.proteinProportion, mode.proteinBarColor]
             mode.fatBar = [mode.fatProportion, mode.fatBarColor]
 
-        # balanced diet
+        # balanced diet (this was purely based on my own intuition and my friend's)
         elif SandboxMode.userGoal == 3:
             # 50, 25, 25, give or take 5
             if (0.45 <= mode.carbsProportion <= 0.55): mode.carbBarColor = 'green'
@@ -476,7 +481,8 @@ class Results(SandboxMode):
         canvas.create_rectangle(65, 225 - 5, 65 + mode.proteinBar[0] * 250,   225 + 5, fill=mode.proteinBar[1])   # protein
         canvas.create_rectangle(65, 300 - 5, 65 + mode.fatBar[0] * 250,       300 + 5, fill=mode.fatBar[1])       # fat 
 
-        # text advice
+        # text advice: the following text is all based on the calculations
+        # I cited the suggestions from where I got my information
         if mode.carbsText:
             canvas.create_text(70 + mode.carbsBar[0] * 250, 150, text='%0.4f' % mode.carbsProportion, anchor='w')
             if mode.carbsBar[1] == 'green':
@@ -568,6 +574,9 @@ class Results(SandboxMode):
         canvas.create_text(3*mode.width/4, 55, text='Time Plan', font='Calibri 15 bold') # graph title
         canvas.create_text(515, 385, text='Number of Days', font='Calibri 10 bold') # number of days
 
+        # CITATION: https://www.healthline.com/nutrition/how-to-lose-weight-as-fast-as-possible#:~:text=The%20first%20week%20is%20usually,is%20usually%20a%20safe%20amount.
+        # (explains why it's safer and healthier to lose weight in increments of 1-2 lbs a week)
+
         if SandboxMode.userCurrentWeight == SandboxMode.userDesiredWeight:
             canvas.create_text(380, 225, text=SandboxMode.userCurrentWeight, font='Calibri 10 bold', anchor='e')
             mode.daysMax = SandboxMode.userTimeExpected
@@ -645,6 +654,7 @@ class Results(SandboxMode):
 
         canvas.create_text(380, 600, text='User Calories: %0.2f calories' % SandboxMode.totalCalories, font='Calibri 12 bold', anchor='w') # total Calories
         canvas.create_text(380, 630, text='TDEE: %0.2f calories' % SandboxMode.userTDEE, font='Calibri 12 bold', anchor='w') # tdee
+        # CITATION: https://tdeecalculator.net/ (What is TDEE?)
         canvas.create_text(380, 685, text='TDEE (Total daily energy expenditure):\nhow many calories you are expected to burn.\nUsing this value, we can find how many more\nor less calories should be consumed to\ngain or lose weight. ', anchor='w')
         
         # canvas.create_text(380, 615, text='Expected Carbs: %0.2f' % (SandboxMode.userTDEE * 4), font='Calibri 10', anchor='w') # expected carbs

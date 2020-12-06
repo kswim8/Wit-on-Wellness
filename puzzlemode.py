@@ -3,6 +3,8 @@
 # Puzzle 2 is optimization and trying to find the right quantities and combination
 # of foods that will meet the constraints while maximizing calories.
 
+# CITATION: https://www.cs.cmu.edu/~112/notes/notes-animations-part3.html#subclassingModalApp
+# CITATION: https://www.cs.cmu.edu/~112/notes/notes-animations-part3.html#cachingPhotoImages
 from cmu_112_graphics import *
 import random, requests, bs4, json
 
@@ -35,13 +37,6 @@ class PuzzleMode(Mode):
 
     def redrawAll(mode, canvas):
         canvas.create_line(200, 0, 200, mode.height)
-        # If I feel like making 3 puzzle modes     
-        # canvas.create_rectangle(0, 0, 200, 250, fill='red')
-        # canvas.create_text(100, 125, text='Puzzle 1', font='Calibri 15 bold')
-        # canvas.create_rectangle(0, 250, 200, 500, fill='yellow')
-        # canvas.create_text(100, 375, text='Puzzle 2', font='Calibri 15 bold')
-        # canvas.create_rectangle(0, 500, 200, 750, fill='green')
-        # canvas.create_text(100, 625, text='Puzzle 3', font='Calibri 15 bold')
         canvas.create_rectangle(0, 0, 200, 375, fill='green')
         canvas.create_text(100, 187.5, text='Puzzle 1\nDifficulty: Easy', font='Calibri 15 bold')
         canvas.create_rectangle(0, 375, 200, 750, fill='red')
@@ -73,7 +68,6 @@ class PuzzleMode1(PuzzleMode):
     answerResponse = False
 
     def appStarted(mode):
-        # pull random foods from API
         pass
 
     def keyPressed(mode, event):
@@ -123,9 +117,6 @@ class PuzzleMode1(PuzzleMode):
             PuzzleMode1.doOnceCounter = 0
             PuzzleMode1.answerBoxColor = 'yellow'
             PuzzleMode1.answerResponse = False
-    
-    def mouseMoved(mode, event):
-        pass
 
     def getCachedPhotoImage(mode, image):
         # stores a cached version of the PhotoImage in the PIL/Pillow image
@@ -222,6 +213,8 @@ class PuzzleMode1(PuzzleMode):
         # web scrape for the image
         picCy = 25 # embed the locations of where they will be placed using picCy
         for foodname in foodset:
+            # As another note here, I have no way of citing every image that shows up from all possible search queries, but the pattern is 
+            # that the image that appears for each food is a result of the first image on Google Images.
             imagerequest = requests.get(f'https://www.google.com/search?tbm=isch&q={foodname}%20food%20or%20drink')
             soup = bs4.BeautifulSoup(imagerequest.text, 'html.parser')
             firstimage = soup.find_all("img")[1]
@@ -364,6 +357,10 @@ class ChickFilA(PuzzleMode2):
                     [mode.totalProtein,  a2, b2, c2,  0, -1,  0], # protein equation
                     [mode.totalCost,     a3, b3, c3,  0,  0, -1]] # cost equation
 
+        # yes, I brute forced the simplex algorithm, the main difference is the basic variable being reviewed
+        # in one of the steps of each pivot, it may be necessary to set the columns of the variable equal to 1 because the variable is being "eliminated"
+        # since one equation would set the basic variable as the non basic variable and it is substituted into every other equation
+
         # if coefficient of a is positive, maximum can still be achieved; thus, find biggest constraint on a
         if slackForm[0][1] >= 0:
             
@@ -392,6 +389,7 @@ class ChickFilA(PuzzleMode2):
                         slackForm[tightestConstraintEquation][6] / slackForm[tightestConstraintEquation][1]] # f
             # print("The rearranged equation is:", newEquation) # this is the rearranged equation
 
+            # where the substituion occurs
             slackForm2 = [  [slackForm[0][0] + slackForm[0][1] * newEquation[0], 0, slackForm[0][2] + slackForm[0][1] * newEquation[2], slackForm[0][3] + slackForm[0][1] * newEquation[3],  slackForm[0][4] + slackForm[0][1] * newEquation[4],  slackForm[0][5] + slackForm[0][1] * newEquation[5],  slackForm[0][6] + slackForm[0][1] * newEquation[6]], # calories equation
                             [slackForm[1][0] + slackForm[1][1] * newEquation[0], 0, slackForm[1][2] + slackForm[1][1] * newEquation[2], slackForm[1][3] + slackForm[1][1] * newEquation[3],  slackForm[1][4] + slackForm[1][1] * newEquation[4],  slackForm[1][5] + slackForm[1][1] * newEquation[5],  slackForm[1][6] + slackForm[1][1] * newEquation[6]], # fat equation
                             [slackForm[2][0] + slackForm[2][1] * newEquation[0], 0, slackForm[2][2] + slackForm[2][1] * newEquation[2], slackForm[2][3] + slackForm[2][1] * newEquation[3],  slackForm[2][4] + slackForm[2][1] * newEquation[4],  slackForm[2][5] + slackForm[2][1] * newEquation[5],  slackForm[2][6] + slackForm[2][1] * newEquation[6]], # protein equation

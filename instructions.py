@@ -1,12 +1,13 @@
 # This is the Instructions page, which is linked to the other modes as well.
 # It mainly describes each mode while showing screenshots of the modes.
 
+# CITATION: https://www.cs.cmu.edu/~112/notes/notes-animations-part3.html#subclassingModalApp
 from cmu_112_graphics import *
 import random, requests, bs4, json
 
 class Instructions(Mode):
     def appStarted(mode):
-        url = 'https://i.pinimg.com/originals/fe/f7/2f/fef72f73f4f961b4ed6f8e4bb093eb1b.jpg'
+        url = 'https://i.pinimg.com/originals/fe/f7/2f/fef72f73f4f961b4ed6f8e4bb093eb1b.jpg' # CITATION: This link leads to the background picture I used.
         mode.appIcon = mode.loadImage(url)
         mode.appIcon2 = mode.scaleImage(mode.appIcon, 4.5/10)
         filename1 = 'sandboxmodepic.png'

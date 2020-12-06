@@ -1,17 +1,18 @@
 # This is a page where you can enjoy pictures of me and Alex who helped to make this app.
 
+# CITATION: https://www.cs.cmu.edu/~112/notes/notes-animations-part3.html#subclassingModalApp
 from cmu_112_graphics import *
 import random, requests, bs4, json
 
 class Credits(Mode):
     def appStarted(mode):
-        kerenpic = 'https://i.imgur.com/C5KDwXl.png'
-        alexpic = 'https://www.cs.cmu.edu/~112/staff-photos/alexx.jpg'
+        kerenpic = 'https://i.imgur.com/C5KDwXl.png' # CITATION: This link is a picture of me from my Imgur.
+        alexpic = 'https://www.cs.cmu.edu/~112/staff-photos/alexx.jpg' # CITATION: This link is a picture of Alex from the 112 course staff page.
         mode.kerenPic = mode.loadImage(kerenpic)
         mode.kerenPic2 = mode.scaleImage(mode.kerenPic, 1)
         mode.alexPic = mode.loadImage(alexpic)
         mode.alexPic2 = mode.scaleImage(mode.alexPic, 1)
-        url = 'https://i.pinimg.com/originals/fe/f7/2f/fef72f73f4f961b4ed6f8e4bb093eb1b.jpg'
+        url = 'https://i.pinimg.com/originals/fe/f7/2f/fef72f73f4f961b4ed6f8e4bb093eb1b.jpg' # CITATION: This link is the photo for the background.
         mode.appIcon = mode.loadImage(url)
         mode.appIcon2 = mode.scaleImage(mode.appIcon, 4.5/10)
 
