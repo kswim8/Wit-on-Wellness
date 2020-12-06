@@ -89,15 +89,6 @@ class SandboxMode(Mode):
         SandboxMode.userDesiredWeight = mode.userGoal
         SandboxMode.userTimeExpected = mode.userTime
         SandboxMode.userGoal = mode.userGoal2
-
-        SandboxMode.userinput1 = mode.userGender
-        SandboxMode.userinput2 = mode.userAge
-        SandboxMode.userinput3 = mode.userHeight
-        SandboxMode.userinput4 = mode.userWeight
-        SandboxMode.userinput5 = mode.userLevelOfActivity
-        SandboxMode.userinput6 = mode.userGoal
-        SandboxMode.userinput7 = mode.userTime
-        SandboxMode.userinput8 = mode.userGoal2
         # print(SandboxMode.userCurrentWeight, SandboxMode.userDesiredWeight, SandboxMode.userTimeExpected)
     
     def calculateTDEE(mode):
@@ -121,18 +112,51 @@ class SandboxMode(Mode):
             mode.app.setActiveMode(mode.app.splashScreenMode)
     
     def importData(mode):
+        # reading the file
         f = open("userdata.txt", "r")
         result = f.read()
+        userData = []
+        # appending each item to a list to be processed
         for item in result.split("~"):
-            print(item)
+            userData += [item]
+        print(userData)
+
+        # setting the list items equal to their mode.variables
+        mode.userGender = userData[0]
+        mode.userAge = int(userData[1])
+        mode.userHeight = int(userData[2])
+        mode.userWeight = int(userData[3])
+        mode.userLevelOfActivity = int(userData[4])
+        mode.userGoal = int(userData[5])
+        mode.userTime = int(userData[6])
+        mode.userGoal2 = int(userData[7])
+        if len(userData) > 8:
+            mode.userFoodDict = json.loads(userData[8])
+
+        # calculating all the values needed for results
+        mode.calculateTDEE()
+        for foodname in mode.userFoodDict:
+            SandboxMode.totalCarbs += mode.userFoodDict[foodname][4][0]
+            SandboxMode.totalProtein += mode.userFoodDict[foodname][4][1]
+            SandboxMode.totalFat += mode.userFoodDict[foodname][4][2]
+            SandboxMode.totalCalories = SandboxMode.totalCarbs * 4 + SandboxMode.totalProtein * 4 + SandboxMode.totalFat * 9
+
+        SandboxMode.userCurrentWeight = mode.userWeight
+        SandboxMode.userDesiredWeight = mode.userGoal
+        SandboxMode.userTimeExpected = mode.userTime
+        SandboxMode.userGoal = mode.userGoal2
 
     def exportData(mode):
-        if SandboxMode.userinput1 != None:
+        # creating the text file for the userdata
+        if mode.userGender != None:
             f = open("userdata.txt", "w")
-            result = str(SandboxMode.userinput1) + "~" + str(SandboxMode.userinput2) + "~" + str(SandboxMode.userinput3) + "~" + str(SandboxMode.userinput4) + "~" + str(SandboxMode.userinput5) + "~" + str(SandboxMode.userinput6) + "~" + str(SandboxMode.userinput7) + "~" + str(SandboxMode.userinput8)
+            result = str(mode.userGender) + "~" + str(mode.userAge) + "~" + str(mode.userHeight) + "~" + str(mode.userWeight) + "~" + str(mode.userLevelOfActivity) + "~" + str(mode.userGoal) + "~" + str(mode.userTime) + "~" + str(mode.userGoal2)
+            if mode.userFoodDict != {}:
+                result = result + "~" + json.dumps(mode.userFoodDict)
             f.write(result)
-            f.close()
+            print(result)
         else:
+            print("Nothing exported.")
             pass
 
     def mouseMoved(mode, event):
@@ -377,12 +401,14 @@ class SandboxMode(Mode):
             
             if mode.userProfile:
                 canvas.create_rectangle(205, 475, 525, 745, fill='white', width=5)
-                if mode.userinput1 != None:
+                if mode.userGender != None:
                     if mode.userGoal2 == 1: mode.userGoal2Text = 'Lose fat'
                     elif mode.userGoal2 == 2: mode.userGoal2Text = 'Build muscle'
                     elif mode.userGoal2 == 3: mode.userGoal2Text = 'Balanced diet'
+                    if mode.userGender == 'm' or mode.userGender == 'M': mode.userGenderText = 'Male'
+                    elif mode.userGender == 'f' or mode.userGender == 'F': mode.userGenderText = 'Fenale'
                     canvas.create_text(265, 500, text='User Profile', font='Calibri 20 bold', anchor='w')
-                    canvas.create_text(265, 620, text=f'Gender: {mode.userGender}\nAge: {mode.userAge}\nHeight: {mode.userHeight} in\nWeight: {mode.userWeight} lbs\nLevel of Activity: {mode.userLevelOfActivity}\nGoal Weight: {mode.userGoal} lbs\nTime Expected: {mode.userTime} days\nUser Goal: {mode.userGoal2Text}', font='Calibri 14 bold', anchor='w')
+                    canvas.create_text(265, 620, text=f'Gender: {mode.userGenderText}\nAge: {mode.userAge}\nHeight: {mode.userHeight} in\nWeight: {mode.userWeight} lbs\nLevel of Activity: {mode.userLevelOfActivity}\nGoal Weight: {mode.userGoal} lbs\nTime Expected: {mode.userTime} days\nUser Goal: {mode.userGoal2Text}', font='Calibri 14 bold', anchor='w')
                 else:
                     canvas.create_text(265, 560, text='No profile made yet.', font='Calibri 14 bold', anchor='w')
             mode.displayFoods(canvas)
@@ -445,11 +471,12 @@ class Results(SandboxMode):
         mode.carbsProportion = 4 * SandboxMode.totalCarbs / SandboxMode.totalCalories
         mode.proteinProportion = 4 * SandboxMode.totalProtein / SandboxMode.totalCalories
         mode.fatProportion = 9 * SandboxMode.totalFat / SandboxMode.totalCalories
+        # print(mode.carbsProportion, mode.proteinProportion, mode.fatProportion)
     
     def checkProportions(mode):
         # check for user's goal (lose fat, build muscle, etc.)
         # return a tuple of bar colors and bar heights
-
+        # print(SandboxMode.userGoal)
         mode.findProportions()
         # fat loss
         # CITATION: https://www.womenshealthmag.com/uk/food/healthy-eating/a705352/best-macros-for-fat-loss/
@@ -533,6 +560,7 @@ class Results(SandboxMode):
         canvas.create_line(315, 100, 315, 350) # y axis (right)
         
         mode.checkProportions() # get bar heights and colors
+        
         canvas.create_rectangle(65, 150 - 5, 65 + mode.carbsBar[0] * 250,     150 + 5, fill=mode.carbsBar[1])     # carbs
         canvas.create_rectangle(65, 225 - 5, 65 + mode.proteinBar[0] * 250,   225 + 5, fill=mode.proteinBar[1])   # protein
         canvas.create_rectangle(65, 300 - 5, 65 + mode.fatBar[0] * 250,       300 + 5, fill=mode.fatBar[1])       # fat 

@@ -27,6 +27,9 @@ IMPORT
 2. assign each part of the split string to the variables
 
 Name of file: userdata.txt
+Format of user data:    [gender, age, height, weight, LOA, goal1, time, goal2]
+                        [gender, age, height, weight, LOA, goal1, time, goal2, fooddict]
+                        [fooddict]
 '''
 
 
