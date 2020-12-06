@@ -114,6 +114,7 @@ class SandboxMode(Mode):
     def importData(mode):
         try:
             # reading the file
+            # CITATION: https://www.geeksforgeeks.org/python-convert-string-dictionary-to-dictionary/
             f = open("userdata.txt", "r")
             result = f.read()
             userData = []
@@ -132,6 +133,7 @@ class SandboxMode(Mode):
             mode.userTime = int(userData[6])
             mode.userGoal2 = int(userData[7])
             if len(userData) > 8:
+                # CITATION: https://www.geeksforgeeks.org/python-convert-string-dictionary-to-dictionary/
                 mode.userFoodDict = json.loads(userData[8])
 
             # calculating all the values needed for results
@@ -153,10 +155,12 @@ class SandboxMode(Mode):
 
     def exportData(mode):
         # creating the text file for the userdata
+        # CITATION: https://www.geeksforgeeks.org/python-convert-dictionary-object-into-string/
         if mode.userGender != None:
             f = open("userdata.txt", "w")
             result = str(mode.userGender) + "~" + str(mode.userAge) + "~" + str(mode.userHeight) + "~" + str(mode.userWeight) + "~" + str(mode.userLevelOfActivity) + "~" + str(mode.userGoal) + "~" + str(mode.userTime) + "~" + str(mode.userGoal2)
             if mode.userFoodDict != {}:
+                # CITATION: https://www.geeksforgeeks.org/python-convert-dictionary-object-into-string/
                 result = result + "~" + json.dumps(mode.userFoodDict)
             f.write(result)
             print(result)
