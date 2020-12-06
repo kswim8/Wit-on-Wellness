@@ -17,15 +17,16 @@ class SandboxMode(Mode):
     userDesiredWeight = None
     userTimeExpected = None
     userGoal = None
+    userinput1 = userinput2 = userinput3 = userinput4 = userinput5 = userinput6 = userinput7 = userinput8 = None
 
     def appStarted(mode):
         mode.results = False
         mode.foodentered = False
         mode.userList = False
-        mode.takeUserInputData()
-        mode.calculateTDEE()
+        mode.userProfile = False
         mode.userFoodDict = dict()
         mode.userfoodcounter = 0
+        mode.userGender = mode.userAge = mode.userHeight = mode.userWeight = mode.userLevelOfActivity = mode.userGoal = mode.userTime = mode.userGoal2 = None
 
     def takeUserInputData(mode):
         # CITATION: https://steelfitusa.com/2018/10/calculate-tdee/
@@ -88,6 +89,15 @@ class SandboxMode(Mode):
         SandboxMode.userDesiredWeight = mode.userGoal
         SandboxMode.userTimeExpected = mode.userTime
         SandboxMode.userGoal = mode.userGoal2
+
+        SandboxMode.userinput1 = mode.userGender
+        SandboxMode.userinput2 = mode.userAge
+        SandboxMode.userinput3 = mode.userHeight
+        SandboxMode.userinput4 = mode.userWeight
+        SandboxMode.userinput5 = mode.userLevelOfActivity
+        SandboxMode.userinput6 = mode.userGoal
+        SandboxMode.userinput7 = mode.userTime
+        SandboxMode.userinput8 = mode.userGoal2
         # print(SandboxMode.userCurrentWeight, SandboxMode.userDesiredWeight, SandboxMode.userTimeExpected)
     
     def calculateTDEE(mode):
@@ -110,22 +120,51 @@ class SandboxMode(Mode):
         if (event.key == 'Escape'):
             mode.app.setActiveMode(mode.app.splashScreenMode)
     
+    def importData(mode):
+        f = open("userdata.txt", "r")
+        result = f.read()
+        for item in result.split("~"):
+            print(item)
+
+    def exportData(mode):
+        if SandboxMode.userinput1 != None:
+            f = open("userdata.txt", "w")
+            result = str(SandboxMode.userinput1) + "~" + str(SandboxMode.userinput2) + "~" + str(SandboxMode.userinput3) + "~" + str(SandboxMode.userinput4) + "~" + str(SandboxMode.userinput5) + "~" + str(SandboxMode.userinput6) + "~" + str(SandboxMode.userinput7) + "~" + str(SandboxMode.userinput8)
+            f.write(result)
+            f.close()
+        else:
+            pass
+
+    def mouseMoved(mode, event):
+        if not mode.userList:
+            if (0 <= event.x <= 200) and (625 < event.y <= 750): # View User Profile
+                mode.userProfile = True
+            else:
+                mode.userProfile = False
+
     def mousePressed(mode, event):
         if not mode.userList:      
             # search food drink
-            if (0 <= event.x <= 200) and (0 <= event.y <= 250):
-                userinput = mode.getUserInput("What did you eat or drink today? ")
-                if (userinput == None) or len(userinput) == 0:
-                    pass
-                else:
-                    mode.getFoodDict(userinput) 
-            # check user list
-            elif ((0 <= event.x <= 200) and (250 < event.y <= 500)):
-                mode.userList = True
-            # results
-            elif (0 <= event.x <= 200) and (500 < event.y <= 750):
-                mode.results = not mode.results
-                mode.app.setActiveMode(mode.app.resultsMode)
+            if (0 <= event.x <= 200):
+                if (0 <= event.y <= 125): # Enter User Data
+                    mode.takeUserInputData()
+                    mode.calculateTDEE()
+                elif (125 < event.y <= 250): # Search Food / Drink
+                    userinput = mode.getUserInput("What did you eat or drink today? ")
+                    if (userinput == None) or len(userinput) == 0:
+                        pass
+                    else:
+                        mode.getFoodDict(userinput) 
+                elif (250 < event.y <= 375): # Check Current User List
+                    mode.userList = True
+                elif (375 < event.y <= 500): # See Results
+                    mode.results = not mode.results
+                    mode.app.setActiveMode(mode.app.resultsMode)
+                elif (500 < event.y <= 625):
+                    if (0 <= event.x < 100): # Import Data
+                        mode.importData()
+                    elif (100 <= event.x <= 200): # Export Data
+                        mode.exportData()
 
             # add to list buttons
             if (mode.foodentered):
@@ -321,13 +360,33 @@ class SandboxMode(Mode):
     def redrawAll(mode, canvas):
         if not mode.userList:
             canvas.create_line(200, 0, 200, mode.height)     
-            canvas.create_rectangle(0, 0, 200, 250, fill='red')
-            canvas.create_text(100, 125, text='Search Food / Drink', font='Calibri 15 bold')
-            canvas.create_rectangle(0, 250, 200, 500, fill='yellow')
-            canvas.create_text(100, 375, text='Check Current User List', font='Calibri 15 bold')
-            canvas.create_rectangle(0, 500, 200, 750, fill='green')
-            canvas.create_text(100, 625, text='See Results', font='Calibri 15 bold')    
+            canvas.create_rectangle(0, 0, 200, 125, fill='red')
+            canvas.create_text(100, 62.5, text='Enter User Data', font='Calibri 15 bold')
+            canvas.create_rectangle(0, 125, 200, 250, fill='orange')
+            canvas.create_text(100, 187.5, text='Search Food / Drink', font='Calibri 15 bold')
+            canvas.create_rectangle(0, 250, 200, 375, fill='yellow')
+            canvas.create_text(100, 312.5, text='Check Current User List', font='Calibri 15 bold')      
+            canvas.create_rectangle(0, 375, 200, 500, fill='green')
+            canvas.create_text(100, 437.5, text='See Results', font='Calibri 15 bold')
+            canvas.create_rectangle(0, 500, 200, 625, fill='blue')
+            canvas.create_line(100, 500, 100, 625) # creating import export in same box
+            canvas.create_text(50, 562.5, text='Import\nData', font='Calibri 15 bold')
+            canvas.create_text(150, 562.5, text='Export\nData', font='Calibri 15 bold')
+            canvas.create_rectangle(0, 625, 200, 750, fill='purple')
+            canvas.create_text(100, 687.5, text='View User Profile', font='Calibri 15 bold')  
+            
+            if mode.userProfile:
+                canvas.create_rectangle(205, 475, 525, 745, fill='white', width=5)
+                if mode.userinput1 != None:
+                    if mode.userGoal2 == 1: mode.userGoal2Text = 'Lose fat'
+                    elif mode.userGoal2 == 2: mode.userGoal2Text = 'Build muscle'
+                    elif mode.userGoal2 == 3: mode.userGoal2Text = 'Balanced diet'
+                    canvas.create_text(265, 500, text='User Profile', font='Calibri 20 bold', anchor='w')
+                    canvas.create_text(265, 620, text=f'Gender: {mode.userGender}\nAge: {mode.userAge}\nHeight: {mode.userHeight} in\nWeight: {mode.userWeight} lbs\nLevel of Activity: {mode.userLevelOfActivity}\nGoal Weight: {mode.userGoal} lbs\nTime Expected: {mode.userTime} days\nUser Goal: {mode.userGoal2Text}', font='Calibri 14 bold', anchor='w')
+                else:
+                    canvas.create_text(265, 560, text='No profile made yet.', font='Calibri 14 bold', anchor='w')
             mode.displayFoods(canvas)
+
         elif mode.userList:
             if mode.userFoodDict == {}: 
                 canvas.create_text(mode.width/2, mode.height/2, text='You have no foods or drinks in your list.', font='Calibri 15 bold')
@@ -336,9 +395,6 @@ class SandboxMode(Mode):
             else:
                 canvas.create_text(5, 25, text='User List of Foods / Drinks', font='Calibri 15 bold', anchor='w')
                 canvas.create_line(0, 50, mode.width, 50)
-                # canvas.create_text(250, 25, text='Total Carbs (g): %0.2f' % mode.totalCarbs, anchor='w') # total carbs
-                # canvas.create_text(375, 25, text='Total Protein (g): %0.2f' % mode.totalProtein, anchor='w') # total proteins
-                # canvas.create_text(500, 25, text='Total Fat (g): %0.2f' % mode.totalFat, anchor='w') # total fats
                 canvas.create_text(235, 25 - 10, text='Total Calories: %0.2f' % SandboxMode.totalCalories, anchor='w')
                 canvas.create_text(235, 25 + 10, text='Total Carbs (g): %0.2f' % SandboxMode.totalCarbs, anchor='w') # total carbs
                 canvas.create_text(360, 25 + 10, text='Total Protein (g): %0.2f' % SandboxMode.totalProtein, anchor='w') # total proteins
