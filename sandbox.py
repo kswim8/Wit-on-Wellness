@@ -112,39 +112,44 @@ class SandboxMode(Mode):
             mode.app.setActiveMode(mode.app.splashScreenMode)
     
     def importData(mode):
-        # reading the file
-        f = open("userdata.txt", "r")
-        result = f.read()
-        userData = []
-        # appending each item to a list to be processed
-        for item in result.split("~"):
-            userData += [item]
-        print(userData)
+        try:
+            # reading the file
+            f = open("userdata.txt", "r")
+            result = f.read()
+            userData = []
+            # appending each item to a list to be processed
+            for item in result.split("~"):
+                userData += [item]
+            print(userData)
 
-        # setting the list items equal to their mode.variables
-        mode.userGender = userData[0]
-        mode.userAge = int(userData[1])
-        mode.userHeight = int(userData[2])
-        mode.userWeight = int(userData[3])
-        mode.userLevelOfActivity = int(userData[4])
-        mode.userGoal = int(userData[5])
-        mode.userTime = int(userData[6])
-        mode.userGoal2 = int(userData[7])
-        if len(userData) > 8:
-            mode.userFoodDict = json.loads(userData[8])
+            # setting the list items equal to their mode.variables
+            mode.userGender = userData[0]
+            mode.userAge = int(userData[1])
+            mode.userHeight = int(userData[2])
+            mode.userWeight = int(userData[3])
+            mode.userLevelOfActivity = int(userData[4])
+            mode.userGoal = int(userData[5])
+            mode.userTime = int(userData[6])
+            mode.userGoal2 = int(userData[7])
+            if len(userData) > 8:
+                mode.userFoodDict = json.loads(userData[8])
 
-        # calculating all the values needed for results
-        mode.calculateTDEE()
-        for foodname in mode.userFoodDict:
-            SandboxMode.totalCarbs += mode.userFoodDict[foodname][4][0]
-            SandboxMode.totalProtein += mode.userFoodDict[foodname][4][1]
-            SandboxMode.totalFat += mode.userFoodDict[foodname][4][2]
-            SandboxMode.totalCalories = SandboxMode.totalCarbs * 4 + SandboxMode.totalProtein * 4 + SandboxMode.totalFat * 9
+            # calculating all the values needed for results
+            mode.calculateTDEE()
+            for foodname in mode.userFoodDict:
+                SandboxMode.totalCarbs += mode.userFoodDict[foodname][4][0]
+                SandboxMode.totalProtein += mode.userFoodDict[foodname][4][1]
+                SandboxMode.totalFat += mode.userFoodDict[foodname][4][2]
+                SandboxMode.totalCalories = SandboxMode.totalCarbs * 4 + SandboxMode.totalProtein * 4 + SandboxMode.totalFat * 9
 
-        SandboxMode.userCurrentWeight = mode.userWeight
-        SandboxMode.userDesiredWeight = mode.userGoal
-        SandboxMode.userTimeExpected = mode.userTime
-        SandboxMode.userGoal = mode.userGoal2
+            SandboxMode.userCurrentWeight = mode.userWeight
+            SandboxMode.userDesiredWeight = mode.userGoal
+            SandboxMode.userTimeExpected = mode.userTime
+            SandboxMode.userGoal = mode.userGoal2
+        except:
+            f = open("userdata.txt", "w")
+            result = str('M') + "~" + str(20) + "~" + str(60) + "~" + str(155) + "~" + str(3) + "~" + str(150) + "~" + str(30) + "~" + str(3)
+            f.write(result)
 
     def exportData(mode):
         # creating the text file for the userdata
@@ -399,6 +404,8 @@ class SandboxMode(Mode):
             canvas.create_rectangle(0, 625, 200, 750, fill='purple')
             canvas.create_text(100, 687.5, text='View User Profile', font='Calibri 15 bold')  
             
+            mode.displayFoods(canvas)
+
             if mode.userProfile:
                 canvas.create_rectangle(205, 475, 525, 745, fill='white', width=5)
                 if mode.userGender != None:
@@ -411,7 +418,7 @@ class SandboxMode(Mode):
                     canvas.create_text(265, 620, text=f'Gender: {mode.userGenderText}\nAge: {mode.userAge}\nHeight: {mode.userHeight} in\nWeight: {mode.userWeight} lbs\nLevel of Activity: {mode.userLevelOfActivity}\nGoal Weight: {mode.userGoal} lbs\nTime Expected: {mode.userTime} days\nUser Goal: {mode.userGoal2Text}', font='Calibri 14 bold', anchor='w')
                 else:
                     canvas.create_text(265, 560, text='No profile made yet.', font='Calibri 14 bold', anchor='w')
-            mode.displayFoods(canvas)
+            
 
         elif mode.userList:
             if mode.userFoodDict == {}: 
