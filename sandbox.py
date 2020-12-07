@@ -27,6 +27,7 @@ class SandboxMode(Mode):
         mode.userFoodDict = dict()
         mode.userfoodcounter = 0
         mode.userGender = mode.userAge = mode.userHeight = mode.userWeight = mode.userLevelOfActivity = mode.userGoal = mode.userTime = mode.userGoal2 = None
+        mode.importedData = False
 
     def takeUserInputData(mode):
         # CITATION: https://steelfitusa.com/2018/10/calculate-tdee/
@@ -148,6 +149,8 @@ class SandboxMode(Mode):
             SandboxMode.userDesiredWeight = mode.userGoal
             SandboxMode.userTimeExpected = mode.userTime
             SandboxMode.userGoal = mode.userGoal2
+            mode.userfoodcounter = len(mode.userFoodDict)
+            mode.importedData = True
         except:
             f = open("userdata.txt", "w")
             result = str('M') + "~" + str(20) + "~" + str(60) + "~" + str(155) + "~" + str(3) + "~" + str(150) + "~" + str(30) + "~" + str(3)
@@ -368,7 +371,7 @@ class SandboxMode(Mode):
         print(mode.foodFullDict)
         # CITATION: https://stackoverflow.com/questions/21530274/format-for-a-url-that-goes-to-google-image-search
         # web scrape for the image
-        picCy = 25 # embed the locations of where they will be placed using picCy
+        mode.picCy = 25 # embed the locations of where they will be placed using mode.picCy
         for foodname in foodset:
             try:
                 # CITATION: It is infeasible to cite every image here because the web scraping and photo used is determined by user input, which has millions of possibilities.
@@ -382,9 +385,9 @@ class SandboxMode(Mode):
                 # print("THE DICT:", mode.foodFullDict[foodname])
                 # print("THE IMAGE URL:", firstimage[srcindex:-3])
                 # print("THE FOODNAME:", foodname)
-                mode.foodFullDict[foodname] = [mode.foodFullDict[foodname], firstimage[srcindex:-3], picCy] # assign value to key
-                mode.foodFullDictCoords[foodname] = picCy
-                picCy += 75   
+                mode.foodFullDict[foodname] = [mode.foodFullDict[foodname], firstimage[srcindex:-3], mode.picCy] # assign value to key
+                mode.foodFullDictCoords[foodname] = mode.picCy
+                mode.picCy += 75   
             except:
                 pass 
 

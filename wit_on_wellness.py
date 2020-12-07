@@ -22,7 +22,7 @@ class WitOnWellness(ModalApp):
         app.resultsMode = Results()
         app.puzzleMode = PuzzleMode()
         app.puzzleMode1 = PuzzleMode1()
-        app.puzzleMode2 = PuzzleMode2()
+        app.puzzleMode2 = PuzzleMode2() 
         app.chickfilaMenu = ChickFilA()
         app.mcdonaldsMenu = McDonalds()
         app.instructions = Instructions()
