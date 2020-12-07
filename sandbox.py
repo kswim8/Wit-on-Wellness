@@ -243,6 +243,8 @@ class SandboxMode(Mode):
         elif mode.userList:
             if mode.userFoodDict == {} and (((mode.width/2 - 200) <= event.x <= (mode.width/2 + 200)) and ((mode.height/2 + 100) <= event.y <= (mode.height/2 + 200))): 
                 mode.userList = False
+            elif mode.userFoodDict != {} and mode.userGender == None:
+                mode.userList = False
             else:
                 if (mode.width-50 <= event.x <= mode.width) and (0 <= event.y <= 50): 
                     mode.userList = False
@@ -455,14 +457,14 @@ class Results(SandboxMode):
 
     def mousePressed(mode, event):
         # back to home screen button
-        if SandboxMode.totalCalories == 0:
+        if SandboxMode.totalCalories == 0 or SandboxMode.userCurrentWeight == None:
             if (mode.width/2 - 100 <= event.x <= mode.width/2 + 100) and (mode.height/2 + 100 <= event.y <= mode.height/2 + 300):
                 mode.app.setActiveMode(mode.app.sandboxMode)
         pass
 
     def mouseMoved(mode, event):
         # show the exact percentage over the bar and a message about the macro itself in relation to user goal
-        if SandboxMode.totalCalories != 0:
+        if SandboxMode.totalCalories != 0 and SandboxMode.userCurrentWeight != None:
             if (65 <= event.x <= 65 + mode.carbsBar[0] * 250) and (150 - 5 <= event.y <= 150 + 5):
                 mode.carbsText = True
                 mode.proteinText = False
@@ -767,10 +769,11 @@ class Results(SandboxMode):
     def redrawAll(mode, canvas):
         canvas.create_rectangle(0, 0, mode.width, 40, fill='cyan')
         canvas.create_text(mode.width/2, 20, text='Results', font='Calibri 15 bold')
-        if SandboxMode.totalCalories == 0:
+        if SandboxMode.totalCalories == 0 or SandboxMode.userCurrentWeight == None:
             canvas.create_text(mode.width/2, mode.height/2, text='No results to show.', font='Calibri 15 bold')
             canvas.create_rectangle(mode.width/2 - 100, mode.height/2 + 150, mode.width/2 + 100, mode.height/2 + 250, fill='cyan')
             canvas.create_text(mode.width/2, mode.height/2 + 200, text='Go Back to Sandbox', font='Calibri 15 bold')
+
         else:
             canvas.create_line(mode.width/2, 40, mode.width/2, mode.height)
             mode.findProportions()
