@@ -340,176 +340,387 @@ class ChickFilA(PuzzleMode2):
     def simplexAlgorithm(mode):
         # CITATION: https://youtu.be/RO5477EKlXE
         mode.totalCalories =    0
-        solution =         [0, 0, 0, mode.totalFat, mode.totalProtein, mode.totalCost]
+        mode.num_vars = random.choice([2, 3])
+        if mode.num_vars == 3:
+            solution =         [0, 0, 0, mode.totalFat, mode.totalProtein, mode.totalCost]
 
-        tightestConstraintA = tightestConstraintB = tightestConstraintC = None
+            tightestConstraintA = tightestConstraintB = tightestConstraintC = None
 
-        # more simplified labels for slackForm system
-        #                calories      fat           protein       cost
-        a0, a1, a2, a3 = mode.fooditem1[0], mode.fooditem1[1], mode.fooditem1[2], mode.fooditem1[3] # 'Chick-fil-A® Chicken Biscuit' (a)
-        b0, b1, b2, b3 = mode.fooditem2[0], mode.fooditem2[1], mode.fooditem2[2], mode.fooditem2[3] # 'Hash Browns'                  (b)
-        c0, c1, c2, c3 = mode.fooditem3[0], mode.fooditem3[1], mode.fooditem3[2], mode.fooditem3[3] # 'Icedream® Cone'               (c)
+            # more simplified labels for slackForm system
+            #                calories      fat           protein       cost
+            a0, a1, a2, a3 = mode.fooditem1[0], mode.fooditem1[1], mode.fooditem1[2], mode.fooditem1[3] # 'Chick-fil-A® Chicken Biscuit' (a)
+            b0, b1, b2, b3 = mode.fooditem2[0], mode.fooditem2[1], mode.fooditem2[2], mode.fooditem2[3] # 'Hash Browns'                  (b)
+            c0, c1, c2, c3 = mode.fooditem3[0], mode.fooditem3[1], mode.fooditem3[2], mode.fooditem3[3] # 'Icedream® Cone'               (c)
 
-        # slackForm linear system, objective function is slackForm[0], to be maximized
-        #             constant       a   b   c    d   e   f
-        slackForm = [[mode.totalCalories, a0, b0, c0,  0,  0,  0], # calories equation
-                    [mode.totalFat,      a1, b1, c1, -1,  0,  0], # fat equation
-                    [mode.totalProtein,  a2, b2, c2,  0, -1,  0], # protein equation
-                    [mode.totalCost,     a3, b3, c3,  0,  0, -1]] # cost equation
+            # slackForm linear system, objective function is slackForm[0], to be maximized
+            #             constant       a   b   c    d   e   f
+            slackForm = [[mode.totalCalories, a0, b0, c0,  0,  0,  0], # calories equation
+                        [mode.totalFat,      a1, b1, c1, -1,  0,  0], # fat equation
+                        [mode.totalProtein,  a2, b2, c2,  0, -1,  0], # protein equation
+                        [mode.totalCost,     a3, b3, c3,  0,  0, -1]] # cost equation
 
-        # yes, I brute forced the simplex algorithm, the main difference is the basic variable being reviewed
-        # in one of the steps of each pivot, it may be necessary to set the columns of the variable equal to 1 because the variable is being "eliminated"
-        # since one equation would set the basic variable as the non basic variable and it is substituted into every other equation
+            # yes, I brute forced the simplex algorithm, the main difference is the basic variable being reviewed
+            # in one of the steps of each pivot, it may be necessary to set the columns of the variable equal to 1 because the variable is being "eliminated"
+            # since one equation would set the basic variable as the non basic variable and it is substituted into every other equation
 
-        # if coefficient of a is positive, maximum can still be achieved; thus, find biggest constraint on a
-        if slackForm[0][1] >= 0:
+            # if coefficient of a is positive, maximum can still be achieved; thus, find biggest constraint on a
+            if slackForm[0][1] >= 0:
+                
+                # finding tightest constraint
+                listOfConstraints = []
+                if (slackForm[1][0] / slackForm[1][1]) < 0:
+                    listOfConstraints.append(-1*(slackForm[1][0] / slackForm[1][1])) # slackForm[1][1]
+                else:
+                    listOfConstraints.append(100)
+                if (slackForm[2][0] / slackForm[2][1]) < 0:
+                    listOfConstraints.append(-1*(slackForm[2][0] / slackForm[2][1])) # slackForm[2][1]
+                else:
+                    listOfConstraints.append(100)
+                if (slackForm[3][0] / slackForm[3][1]) < 0:
+                    listOfConstraints.append(-1*(slackForm[3][0] / slackForm[3][1])) # slackForm[3][1]
+                else:
+                    listOfConstraints.append(100)
+                tightestConstraint = min(listOfConstraints)
+                # print("List of constraints:", listOfConstraints) # fat, protein, cost
+                # print("The tightest constraint is:", tightestConstraint) 
+
+                # find the equation where the tightest constraint was found
+                tightestConstraintEquation = listOfConstraints.index(tightestConstraint) + 1
+                # print("The equation with the tightest constraint is:", tightestConstraintEquation) # 1 = fat, 2 = protein, 3 = cost 
+                tightestConstraintA = tightestConstraintEquation
+
+                slackForm[tightestConstraintEquation][1] *= -1 # when we rearrange, we need to multiply by -1 because we're "moving to the other side"
+                # since the tighest constraint here was protein (equation 2), 30/17 = 1.7647, we rearrange e and a in the format a = constant - b - c - e
+                newEquation = [slackForm[tightestConstraintEquation][0] / slackForm[tightestConstraintEquation][1], # constant
+                            1,                                                                                   # a
+                            slackForm[tightestConstraintEquation][2] / slackForm[tightestConstraintEquation][1], # b
+                            slackForm[tightestConstraintEquation][3] / slackForm[tightestConstraintEquation][1], # c
+                            slackForm[tightestConstraintEquation][4] / slackForm[tightestConstraintEquation][1], # d
+                            slackForm[tightestConstraintEquation][5] / slackForm[tightestConstraintEquation][1], # e 
+                            slackForm[tightestConstraintEquation][6] / slackForm[tightestConstraintEquation][1]] # f
+                # print("The rearranged equation is:", newEquation) # this is the rearranged equation
+
+                # where the substituion occurs
+                slackForm2 = [  [slackForm[0][0] + slackForm[0][1] * newEquation[0], 0, slackForm[0][2] + slackForm[0][1] * newEquation[2], slackForm[0][3] + slackForm[0][1] * newEquation[3],  slackForm[0][4] + slackForm[0][1] * newEquation[4],  slackForm[0][5] + slackForm[0][1] * newEquation[5],  slackForm[0][6] + slackForm[0][1] * newEquation[6]], # calories equation
+                                [slackForm[1][0] + slackForm[1][1] * newEquation[0], 0, slackForm[1][2] + slackForm[1][1] * newEquation[2], slackForm[1][3] + slackForm[1][1] * newEquation[3],  slackForm[1][4] + slackForm[1][1] * newEquation[4],  slackForm[1][5] + slackForm[1][1] * newEquation[5],  slackForm[1][6] + slackForm[1][1] * newEquation[6]], # fat equation
+                                [slackForm[2][0] + slackForm[2][1] * newEquation[0], 0, slackForm[2][2] + slackForm[2][1] * newEquation[2], slackForm[2][3] + slackForm[2][1] * newEquation[3],  slackForm[2][4] + slackForm[2][1] * newEquation[4],  slackForm[2][5] + slackForm[2][1] * newEquation[5],  slackForm[2][6] + slackForm[2][1] * newEquation[6]], # protein equation
+                                [slackForm[3][0] + slackForm[3][1] * newEquation[0], 0, slackForm[3][2] + slackForm[3][1] * newEquation[2], slackForm[3][3] + slackForm[3][1] * newEquation[3],  slackForm[3][4] + slackForm[3][1] * newEquation[4],  slackForm[3][5] + slackForm[3][1] * newEquation[5],  slackForm[3][6] + slackForm[3][1] * newEquation[6]]] # cost equation
+
+                slackForm2[tightestConstraintEquation] = newEquation
+                slackForm2[tightestConstraintEquation][1] = -1
+
+                # print(slackForm2[0])
+                # print(slackForm2[1])
+                # print(slackForm2[2])
+                # print(slackForm2[3])
+                slackForm = slackForm2
+                solution[0] = slackForm[tightestConstraintEquation][0]
+                # print("Current solution is:", solution)
+                # print(slackForm)
             
-            # finding tightest constraint
-            listOfConstraints = []
-            listOfConstraints.append(abs(slackForm[1][0] / slackForm[1][1])) # slackForm[1][1]
-            listOfConstraints.append(abs(slackForm[2][0] / slackForm[2][1])) # slackForm[2][1]
-            listOfConstraints.append(abs(slackForm[3][0] / slackForm[3][1])) # slackForm[3][1]
-            tightestConstraint = min(listOfConstraints)
-            # print("List of constraints:", listOfConstraints) # fat, protein, cost
-            # print("The tightest constraint is:", tightestConstraint) 
+            # if coefficient of b is positive, maximum can still be achieved; thus, find biggest constraint on b
+            if slackForm[0][2] >= 0:
 
-            # find the equation where the tightest constraint was found
-            tightestConstraintEquation = listOfConstraints.index(tightestConstraint) + 1
-            # print("The equation with the tightest constraint is:", tightestConstraintEquation) # 1 = fat, 2 = protein, 3 = cost 
-            tightestConstraintA = tightestConstraintEquation
+                # finding tightest constraint
+                listOfConstraints = []
+                if (slackForm[1][0] / slackForm[1][2]) < 0:
+                    listOfConstraints.append(-1*(slackForm[1][0] / slackForm[1][2])) # slackForm[1][1]
+                else:
+                    listOfConstraints.append(100)
+                if (slackForm[2][0] / slackForm[2][2]) < 0:
+                    listOfConstraints.append(-1*(slackForm[2][0] / slackForm[2][2])) # slackForm[2][1]
+                else:
+                    listOfConstraints.append(100)
+                if (slackForm[3][0] / slackForm[3][2]) < 0:
+                    listOfConstraints.append(-1*(slackForm[3][0] / slackForm[3][2])) # slackForm[3][1]
+                else:
+                    listOfConstraints.append(100)
+                tightestConstraint = min(listOfConstraints)
+                # print("List of constraints:", listOfConstraints) # fat, protein, cost
+                # print("The tightest constraint is:", tightestConstraint) 
 
-            slackForm[tightestConstraintEquation][1] *= -1 # when we rearrange, we need to multiply by -1 because we're "moving to the other side"
-            # since the tighest constraint here was protein (equation 2), 30/17 = 1.7647, we rearrange e and a in the format a = constant - b - c - e
-            newEquation = [slackForm[tightestConstraintEquation][0] / slackForm[tightestConstraintEquation][1], # constant
-                        1,                                                                                   # a
-                        slackForm[tightestConstraintEquation][2] / slackForm[tightestConstraintEquation][1], # b
-                        slackForm[tightestConstraintEquation][3] / slackForm[tightestConstraintEquation][1], # c
-                        slackForm[tightestConstraintEquation][4] / slackForm[tightestConstraintEquation][1], # d
-                        slackForm[tightestConstraintEquation][5] / slackForm[tightestConstraintEquation][1], # e 
-                        slackForm[tightestConstraintEquation][6] / slackForm[tightestConstraintEquation][1]] # f
-            # print("The rearranged equation is:", newEquation) # this is the rearranged equation
+                # find the equation where the tighest constraint was found
+                tightestConstraintEquation = listOfConstraints.index(tightestConstraint) + 1
+                # print("The equation with the tightest constraint is:", tightestConstraintEquation) # 1 = fat, 2 = protein, 3 = cost 
+                tightestConstraintB = tightestConstraintEquation
 
-            # where the substituion occurs
-            slackForm2 = [  [slackForm[0][0] + slackForm[0][1] * newEquation[0], 0, slackForm[0][2] + slackForm[0][1] * newEquation[2], slackForm[0][3] + slackForm[0][1] * newEquation[3],  slackForm[0][4] + slackForm[0][1] * newEquation[4],  slackForm[0][5] + slackForm[0][1] * newEquation[5],  slackForm[0][6] + slackForm[0][1] * newEquation[6]], # calories equation
-                            [slackForm[1][0] + slackForm[1][1] * newEquation[0], 0, slackForm[1][2] + slackForm[1][1] * newEquation[2], slackForm[1][3] + slackForm[1][1] * newEquation[3],  slackForm[1][4] + slackForm[1][1] * newEquation[4],  slackForm[1][5] + slackForm[1][1] * newEquation[5],  slackForm[1][6] + slackForm[1][1] * newEquation[6]], # fat equation
-                            [slackForm[2][0] + slackForm[2][1] * newEquation[0], 0, slackForm[2][2] + slackForm[2][1] * newEquation[2], slackForm[2][3] + slackForm[2][1] * newEquation[3],  slackForm[2][4] + slackForm[2][1] * newEquation[4],  slackForm[2][5] + slackForm[2][1] * newEquation[5],  slackForm[2][6] + slackForm[2][1] * newEquation[6]], # protein equation
-                            [slackForm[3][0] + slackForm[3][1] * newEquation[0], 0, slackForm[3][2] + slackForm[3][1] * newEquation[2], slackForm[3][3] + slackForm[3][1] * newEquation[3],  slackForm[3][4] + slackForm[3][1] * newEquation[4],  slackForm[3][5] + slackForm[3][1] * newEquation[5],  slackForm[3][6] + slackForm[3][1] * newEquation[6]]] # cost equation
+                slackForm[tightestConstraintEquation][2] *= -1 # when we rearrange, we need to multiply by -1 because we're "moving to the other side"
+                # since the tighest constraint here was protein (equation 2), 30/17 = 1.7647, we rearrange e and a in the format a = constant - b - c - e
+                newEquation = [slackForm[tightestConstraintEquation][0] / slackForm[tightestConstraintEquation][2], # constant
+                            slackForm[tightestConstraintEquation][1] / slackForm[tightestConstraintEquation][2], # a
+                            1,                                                                                   # b
+                            slackForm[tightestConstraintEquation][3] / slackForm[tightestConstraintEquation][2], # c
+                            slackForm[tightestConstraintEquation][4] / slackForm[tightestConstraintEquation][2], # d
+                            slackForm[tightestConstraintEquation][5] / slackForm[tightestConstraintEquation][2], # e 
+                            slackForm[tightestConstraintEquation][6] / slackForm[tightestConstraintEquation][2]] # f
+                # print("The rearranged equation is:", newEquation) # this is the rearranged equation
 
-            slackForm2[tightestConstraintEquation] = newEquation
-            slackForm2[tightestConstraintEquation][1] = -1
+                slackForm2 = [  [slackForm[0][0] + slackForm[0][2] * newEquation[0], slackForm[0][1] + slackForm[0][2] * newEquation[1], 0, slackForm[0][3] + slackForm[0][2] * newEquation[3],  slackForm[0][4] + slackForm[0][2] * newEquation[4],  slackForm[0][5] + slackForm[0][2] * newEquation[5],  slackForm[0][6] + slackForm[0][2] * newEquation[6]], # calories equation
+                                [slackForm[1][0] + slackForm[1][2] * newEquation[0], slackForm[1][1] + slackForm[1][2] * newEquation[1], 0, slackForm[1][3] + slackForm[1][2] * newEquation[3],  slackForm[1][4] + slackForm[1][2] * newEquation[4],  slackForm[1][5] + slackForm[1][2] * newEquation[5],  slackForm[1][6] + slackForm[1][2] * newEquation[6]], # fat equation
+                                [slackForm[2][0] + slackForm[2][2] * newEquation[0], slackForm[2][1] + slackForm[2][2] * newEquation[1], 0, slackForm[2][3] + slackForm[2][2] * newEquation[3],  slackForm[2][4] + slackForm[2][2] * newEquation[4],  slackForm[2][5] + slackForm[2][2] * newEquation[5],  slackForm[2][6] + slackForm[2][2] * newEquation[6]], # protein equation
+                                [slackForm[3][0] + slackForm[3][2] * newEquation[0], slackForm[3][1] + slackForm[3][2] * newEquation[1], 0, slackForm[3][3] + slackForm[3][2] * newEquation[3],  slackForm[3][4] + slackForm[3][2] * newEquation[4],  slackForm[3][5] + slackForm[3][2] * newEquation[5],  slackForm[3][6] + slackForm[3][2] * newEquation[6]]] # cost equation
 
-            # print(slackForm2[0])
-            # print(slackForm2[1])
-            # print(slackForm2[2])
-            # print(slackForm2[3])
-            slackForm = slackForm2
-            solution[0] = slackForm[tightestConstraintEquation][0]
-            # print("Current solution is:", solution)
-            # print(slackForm)
-        
-        # if coefficient of b is positive, maximum can still be achieved; thus, find biggest constraint on b
-        if slackForm[0][2] >= 0:
+                slackForm2[tightestConstraintEquation] = newEquation
+                slackForm2[tightestConstraintEquation][2] = -1
+                
 
-            # finding tightest constraint
-            listOfConstraints = []
-            listOfConstraints.append(abs(slackForm[1][0] / slackForm[1][2])) # slackForm[1][1]
-            listOfConstraints.append(abs(slackForm[2][0] / slackForm[2][2])) # slackForm[2][1]
-            listOfConstraints.append(abs(slackForm[3][0] / slackForm[3][2])) # slackForm[3][1]
-            tightestConstraint = min(listOfConstraints)
-            # print("List of constraints:", listOfConstraints) # fat, protein, cost
-            # print("The tightest constraint is:", tightestConstraint) 
+                # print(slackForm2[0])
+                # print(slackForm2[1])
+                # print(slackForm2[2])
+                # print(slackForm2[3])
+                
+                slackForm = slackForm2
+                solution[0] = slackForm[tightestConstraintA][0]
+                solution[1] = slackForm[tightestConstraintEquation][0]
+                tightestConstraintB = tightestConstraintEquation
+                # print(slackForm)
+                if tightestConstraintB == tightestConstraintA: 
+                    solution[0] = 0
 
-            # find the equation where the tighest constraint was found
-            tightestConstraintEquation = listOfConstraints.index(tightestConstraint) + 1
-            # print("The equation with the tightest constraint is:", tightestConstraintEquation) # 1 = fat, 2 = protein, 3 = cost 
-            tightestConstraintB = tightestConstraintEquation
+            # if coefficient of c is positive, maximum can still be achieved; thus, find biggest constraint on c
+            if slackForm[0][3] >= 0:
 
-            slackForm[tightestConstraintEquation][2] *= -1 # when we rearrange, we need to multiply by -1 because we're "moving to the other side"
-            # since the tighest constraint here was protein (equation 2), 30/17 = 1.7647, we rearrange e and a in the format a = constant - b - c - e
-            newEquation = [slackForm[tightestConstraintEquation][0] / slackForm[tightestConstraintEquation][2], # constant
-                        slackForm[tightestConstraintEquation][1] / slackForm[tightestConstraintEquation][2], # a
-                        1,                                                                                   # b
-                        slackForm[tightestConstraintEquation][3] / slackForm[tightestConstraintEquation][2], # c
-                        slackForm[tightestConstraintEquation][4] / slackForm[tightestConstraintEquation][2], # d
-                        slackForm[tightestConstraintEquation][5] / slackForm[tightestConstraintEquation][2], # e 
-                        slackForm[tightestConstraintEquation][6] / slackForm[tightestConstraintEquation][2]] # f
-            # print("The rearranged equation is:", newEquation) # this is the rearranged equation
+                # finding tightest constraint
+                listOfConstraints = []
+                if (slackForm[1][0] / slackForm[1][3]) < 0:
+                    listOfConstraints.append(-1*(slackForm[1][0] / slackForm[1][3])) # slackForm[1][1]
+                else:
+                    listOfConstraints.append(100)
+                if (slackForm[2][0] / slackForm[2][3]) < 0:
+                    listOfConstraints.append(-1*(slackForm[2][0] / slackForm[2][3])) # slackForm[2][1]
+                else:
+                    listOfConstraints.append(100)
+                if (slackForm[3][0] / slackForm[3][3]) < 0:
+                    listOfConstraints.append(-1*(slackForm[3][0] / slackForm[3][3])) # slackForm[3][1]
+                else:
+                    listOfConstraints.append(100)
+                tightestConstraint = min(listOfConstraints)
+                # print("List of constraints:", listOfConstraints) # fat, protein, cost
+                # print("The tightest constraint is:", tightestConstraint) 
 
-            slackForm2 = [  [slackForm[0][0] + slackForm[0][2] * newEquation[0], slackForm[0][1] + slackForm[0][2] * newEquation[1], 0, slackForm[0][3] + slackForm[0][2] * newEquation[3],  slackForm[0][4] + slackForm[0][2] * newEquation[4],  slackForm[0][5] + slackForm[0][2] * newEquation[5],  slackForm[0][6] + slackForm[0][2] * newEquation[6]], # calories equation
-                            [slackForm[1][0] + slackForm[1][2] * newEquation[0], slackForm[1][1] + slackForm[1][2] * newEquation[1], 0, slackForm[1][3] + slackForm[1][2] * newEquation[3],  slackForm[1][4] + slackForm[1][2] * newEquation[4],  slackForm[1][5] + slackForm[1][2] * newEquation[5],  slackForm[1][6] + slackForm[1][2] * newEquation[6]], # fat equation
-                            [slackForm[2][0] + slackForm[2][2] * newEquation[0], slackForm[2][1] + slackForm[2][2] * newEquation[1], 0, slackForm[2][3] + slackForm[2][2] * newEquation[3],  slackForm[2][4] + slackForm[2][2] * newEquation[4],  slackForm[2][5] + slackForm[2][2] * newEquation[5],  slackForm[2][6] + slackForm[2][2] * newEquation[6]], # protein equation
-                            [slackForm[3][0] + slackForm[3][2] * newEquation[0], slackForm[3][1] + slackForm[3][2] * newEquation[1], 0, slackForm[3][3] + slackForm[3][2] * newEquation[3],  slackForm[3][4] + slackForm[3][2] * newEquation[4],  slackForm[3][5] + slackForm[3][2] * newEquation[5],  slackForm[3][6] + slackForm[3][2] * newEquation[6]]] # cost equation
+                # find the equation where the tighest constraint was found
+                tightestConstraintEquation = listOfConstraints.index(tightestConstraint) + 1
+                # print("The equation with the tightest constraint is:", tightestConstraintEquation) # 1 = fat, 2 = protein, 3 = cost 
+                tightestConstraintC = tightestConstraintEquation
 
-            slackForm2[tightestConstraintEquation] = newEquation
-            slackForm2[tightestConstraintEquation][2] = -1
+                slackForm[tightestConstraintEquation][3] *= -1 # when we rearrange, we need to multiply by -1 because we're "moving to the other side"
+                # since the tighest constraint here was protein (equation 2), 30/17 = 1.7647, we rearrange e and a in the format a = constant - b - c - e
+                newEquation = [slackForm[tightestConstraintEquation][0] / slackForm[tightestConstraintEquation][3], # constant
+                            slackForm[tightestConstraintEquation][1] / slackForm[tightestConstraintEquation][3], # a
+                            slackForm[tightestConstraintEquation][2] / slackForm[tightestConstraintEquation][3], # b
+                            1,                                                                                   # c
+                            slackForm[tightestConstraintEquation][4] / slackForm[tightestConstraintEquation][3], # d
+                            slackForm[tightestConstraintEquation][5] / slackForm[tightestConstraintEquation][3], # e 
+                            slackForm[tightestConstraintEquation][6] / slackForm[tightestConstraintEquation][3]] # f
+                # print("The rearranged equation is:", newEquation) # this is the rearranged equation
+
+                slackForm2 = [  [slackForm[0][0] + slackForm[0][3] * newEquation[0], slackForm[0][1] + slackForm[0][3] * newEquation[1], slackForm[0][3] + slackForm[0][3] * newEquation[2], 0,  slackForm[0][4] + slackForm[0][3] * newEquation[4],  slackForm[0][5] + slackForm[0][3] * newEquation[5],  slackForm[0][6] + slackForm[0][3] * newEquation[6]], # calories equation
+                                [slackForm[1][0] + slackForm[1][3] * newEquation[0], slackForm[1][1] + slackForm[1][3] * newEquation[1], slackForm[1][3] + slackForm[1][3] * newEquation[2], 0,  slackForm[1][4] + slackForm[1][3] * newEquation[4],  slackForm[1][5] + slackForm[1][3] * newEquation[5],  slackForm[1][6] + slackForm[1][3] * newEquation[6]], # fat equation
+                                [slackForm[2][0] + slackForm[2][3] * newEquation[0], slackForm[2][1] + slackForm[2][3] * newEquation[1], slackForm[2][3] + slackForm[2][3] * newEquation[2], 0,  slackForm[2][4] + slackForm[2][3] * newEquation[4],  slackForm[2][5] + slackForm[2][3] * newEquation[5],  slackForm[2][6] + slackForm[2][3] * newEquation[6]], # protein equation
+                                [slackForm[3][0] + slackForm[3][3] * newEquation[0], slackForm[3][1] + slackForm[3][3] * newEquation[1], slackForm[3][3] + slackForm[3][3] * newEquation[2], 0,  slackForm[3][4] + slackForm[3][3] * newEquation[4],  slackForm[3][5] + slackForm[3][3] * newEquation[5],  slackForm[3][6] + slackForm[3][3] * newEquation[6]]] # cost equation
+
+                slackForm2[tightestConstraintEquation] = newEquation
+                slackForm2[tightestConstraintEquation][3] = -1
+
+                # print(slackForm2[0])
+                # print(slackForm2[1])
+                # print(slackForm2[2])
+                # print(slackForm2[3])
+                slackForm = slackForm2
+                solution[0] = slackForm[tightestConstraintA][0]
+                if tightestConstraintB != None:
+                    solution[1] = slackForm[tightestConstraintB][0]
+                if tightestConstraintC != None:
+                    solution[2] = slackForm[tightestConstraintEquation][0]
+                # print(slackForm)
+                if tightestConstraintC == tightestConstraintA: solution[0] = 0
+                if tightestConstraintC == tightestConstraintB: solution[1] = 0
+                if tightestConstraintB == tightestConstraintA: solution[0] = 0
+
+            # print(solution)
+            totalCalories = slackForm[0][0]
+            ChickFilA.solution = solution
+            # print("FINAL SOLUTION:", solution)
+            # print("TOTAL CALORIES:", totalCalories)
+        elif mode.num_vars == 2:
+            solution =         [0, 0, 0, mode.totalFat, mode.totalCost]
+
+            tightestConstraintA = tightestConstraintB = tightestConstraintC = None
+
+            # more simplified labels for slackForm system
+            #                calories      fat           protein       cost
+            a0, a1, a2, a3 = mode.fooditem1[0], mode.fooditem1[1], mode.fooditem1[2], mode.fooditem1[3] # 'Chick-fil-A® Chicken Biscuit' (a)
+            b0, b1, b2, b3 = mode.fooditem2[0], mode.fooditem2[1], mode.fooditem2[2], mode.fooditem2[3] # 'Hash Browns'                  (b)
+            c0, c1, c2, c3 = mode.fooditem3[0], mode.fooditem3[1], mode.fooditem3[2], mode.fooditem3[3] # 'Icedream® Cone'               (c)
+
+            # slackForm linear system, objective function is slackForm[0], to be maximized
+            #             constant       a   b   c    d   e   f
+            slackForm = [[mode.totalCalories, a0, b0, c0,  0,  0,  0], # calories equation
+                        [mode.totalFat,      a1, b1, c1, -1,  0,  0], # fat equation
+                        [mode.totalCost,     a3, b3, c3,  0,  0, -1]] # cost equation
+            # if coefficient of a is positive, maximum can still be achieved; thus, find biggest constraint on a
+            if slackForm[0][1] >= 0:
+                
+                # finding tightest constraint
+                listOfConstraints = []
+                if (slackForm[1][0] / slackForm[1][1]) < 0:
+                    listOfConstraints.append(-1*(slackForm[1][0] / slackForm[1][1])) # slackForm[1][1]
+                else:
+                    listOfConstraints.append(100)
+                if (slackForm[2][0] / slackForm[2][1]) < 0:
+                    listOfConstraints.append(-1*(slackForm[2][0] / slackForm[2][1])) # slackForm[2][1]
+                else:
+                    listOfConstraints.append(100)
+                tightestConstraint = min(listOfConstraints)
+                # print("List of constraints:", listOfConstraints) # fat, protein, cost
+                # print("The tightest constraint is:", tightestConstraint) 
+
+                # find the equation where the tightest constraint was found
+                tightestConstraintEquation = listOfConstraints.index(tightestConstraint) + 1
+                # print("The equation with the tightest constraint is:", tightestConstraintEquation) # 1 = fat, 2 = protein, 3 = cost 
+                tightestConstraintA = tightestConstraintEquation
+
+                slackForm[tightestConstraintEquation][1] = abs(slackForm[tightestConstraintEquation][1]) # when we rearrange, we need to multiply by -1 because we're "moving to the other side"
+                # since the tighest constraint here was protein (equation 2), 30/17 = 1.7647, we rearrange e and a in the format a = constant - b - c - e
+                newEquation = [slackForm[tightestConstraintEquation][0] / slackForm[tightestConstraintEquation][1], # constant
+                            1,                                                                                   # a
+                            slackForm[tightestConstraintEquation][2] / slackForm[tightestConstraintEquation][1], # b
+                            slackForm[tightestConstraintEquation][3] / slackForm[tightestConstraintEquation][1], # c
+                            slackForm[tightestConstraintEquation][4] / slackForm[tightestConstraintEquation][1], # d
+                            slackForm[tightestConstraintEquation][5] / slackForm[tightestConstraintEquation][1], # e 
+                            slackForm[tightestConstraintEquation][6] / slackForm[tightestConstraintEquation][1]] # f
+                # print("The rearranged equation is:", newEquation) # this is the rearranged equation
+
+                # where the substituion occurs
+                slackForm2 = [  [slackForm[0][0] + slackForm[0][1] * newEquation[0], 0, slackForm[0][2] + slackForm[0][1] * newEquation[2], slackForm[0][3] + slackForm[0][1] * newEquation[3],  slackForm[0][4] + slackForm[0][1] * newEquation[4],  slackForm[0][5] + slackForm[0][1] * newEquation[5],  slackForm[0][6] + slackForm[0][1] * newEquation[6]], # calories equation
+                                [slackForm[1][0] + slackForm[1][1] * newEquation[0], 0, slackForm[1][2] + slackForm[1][1] * newEquation[2], slackForm[1][3] + slackForm[1][1] * newEquation[3],  slackForm[1][4] + slackForm[1][1] * newEquation[4],  slackForm[1][5] + slackForm[1][1] * newEquation[5],  slackForm[1][6] + slackForm[1][1] * newEquation[6]], # fat equation
+                                [slackForm[2][0] + slackForm[2][1] * newEquation[0], 0, slackForm[2][2] + slackForm[2][1] * newEquation[2], slackForm[2][3] + slackForm[2][1] * newEquation[3],  slackForm[2][4] + slackForm[2][1] * newEquation[4],  slackForm[2][5] + slackForm[2][1] * newEquation[5],  slackForm[2][6] + slackForm[2][1] * newEquation[6]]] # cost equation
+
+                slackForm2[tightestConstraintEquation] = newEquation
+                slackForm2[tightestConstraintEquation][1] = -1
+
+                # print(slackForm2[0])
+                # print(slackForm2[1])
+                # print(slackForm2[2])
+                # print(slackForm2[3])
+                slackForm = slackForm2
+                solution[0] = slackForm[tightestConstraintEquation][0]
+                # print("Current solution is:", solution)
+                # print(slackForm)
+
+            # if coefficient of b is positive, maximum can still be achieved; thus, find biggest constraint on b
+            if slackForm[0][2] >= 0:
+
+                # finding tightest constraint
+                listOfConstraints = []
+                if (slackForm[1][0] / slackForm[1][2]) < 0:
+                    listOfConstraints.append(-1*(slackForm[1][0] / slackForm[1][2])) # slackForm[1][1]
+                else:
+                    listOfConstraints.append(100)
+                if (slackForm[2][0] / slackForm[2][2]) < 0:
+                    listOfConstraints.append(-1*(slackForm[2][0] / slackForm[2][2])) # slackForm[2][1]
+                else:
+                    listOfConstraints.append(100)
+                tightestConstraint = min(listOfConstraints)
+                # print("List of constraints:", listOfConstraints) # fat, protein, cost
+                # print("The tightest constraint is:", tightestConstraint) 
+
+                # find the equation where the tighest constraint was found
+                tightestConstraintEquation = listOfConstraints.index(tightestConstraint) + 1
+                # print("The equation with the tightest constraint is:", tightestConstraintEquation) # 1 = fat, 2 = protein, 3 = cost 
+                tightestConstraintB = tightestConstraintEquation
+
+                slackForm[tightestConstraintEquation][2] = abs(slackForm[tightestConstraintEquation][2]) # when we rearrange, we need to multiply by -1 because we're "moving to the other side"
+                # since the tighest constraint here was protein (equation 2), 30/17 = 1.7647, we rearrange e and a in the format a = constant - b - c - e
+                newEquation = [slackForm[tightestConstraintEquation][0] / slackForm[tightestConstraintEquation][2], # constant
+                            slackForm[tightestConstraintEquation][1] / slackForm[tightestConstraintEquation][2], # a
+                            1,                                                                                   # b
+                            slackForm[tightestConstraintEquation][3] / slackForm[tightestConstraintEquation][2], # c
+                            slackForm[tightestConstraintEquation][4] / slackForm[tightestConstraintEquation][2], # d
+                            slackForm[tightestConstraintEquation][5] / slackForm[tightestConstraintEquation][2], # e 
+                            slackForm[tightestConstraintEquation][6] / slackForm[tightestConstraintEquation][2]] # f
+                # print("The rearranged equation is:", newEquation) # this is the rearranged equation
+
+                slackForm2 = [  [slackForm[0][0] + slackForm[0][2] * newEquation[0], slackForm[0][1] + slackForm[0][2] * newEquation[1], 0, slackForm[0][3] + slackForm[0][2] * newEquation[3],  slackForm[0][4] + slackForm[0][2] * newEquation[4],  slackForm[0][5] + slackForm[0][2] * newEquation[5],  slackForm[0][6] + slackForm[0][2] * newEquation[6]], # calories equation
+                                [slackForm[1][0] + slackForm[1][2] * newEquation[0], slackForm[1][1] + slackForm[1][2] * newEquation[1], 0, slackForm[1][3] + slackForm[1][2] * newEquation[3],  slackForm[1][4] + slackForm[1][2] * newEquation[4],  slackForm[1][5] + slackForm[1][2] * newEquation[5],  slackForm[1][6] + slackForm[1][2] * newEquation[6]], # fat equation
+                                [slackForm[2][0] + slackForm[2][2] * newEquation[0], slackForm[2][1] + slackForm[2][2] * newEquation[1], 0, slackForm[2][3] + slackForm[2][2] * newEquation[3],  slackForm[2][4] + slackForm[2][2] * newEquation[4],  slackForm[2][5] + slackForm[2][2] * newEquation[5],  slackForm[2][6] + slackForm[2][2] * newEquation[6]]] # cost equation
+
+                slackForm2[tightestConstraintEquation] = newEquation
+                slackForm2[tightestConstraintEquation][2] = -1
+                
+
+                # print(slackForm2[0])
+                # print(slackForm2[1])
+                # print(slackForm2[2])
+                # print(slackForm2[3])
+                
+                slackForm = slackForm2
+                solution[0] = slackForm[tightestConstraintA][0]
+                solution[1] = slackForm[tightestConstraintEquation][0]
+                tightestConstraintB = tightestConstraintEquation
+                # print(slackForm)
+                if tightestConstraintB == tightestConstraintA: solution[0] = 0
             
+            # if coefficient of c is positive, maximum can still be achieved; thus, find biggest constraint on c
+            if slackForm[0][3] >= 0:
 
-            # print(slackForm2[0])
-            # print(slackForm2[1])
-            # print(slackForm2[2])
-            # print(slackForm2[3])
-            
-            slackForm = slackForm2
-            solution[0] = slackForm[tightestConstraintA][0]
-            solution[1] = slackForm[tightestConstraintEquation][0]
-            tightestConstraintB = tightestConstraintEquation
-            # print(slackForm)
-            if tightestConstraintB == tightestConstraintA: solution[0] = 0
+                # finding tightest constraint
+                listOfConstraints = []
+                if (slackForm[1][0] / slackForm[1][3]) < 0:
+                    listOfConstraints.append(-1*(slackForm[1][0] / slackForm[1][3])) # slackForm[1][1]
+                else:
+                    listOfConstraints.append(100)
+                if (slackForm[2][0] / slackForm[2][3]) < 0:
+                    listOfConstraints.append(-1*(slackForm[2][0] / slackForm[2][3])) # slackForm[2][1]
+                else:
+                    listOfConstraints.append(100)
+                tightestConstraint = min(listOfConstraints)
+                # print("List of constraints:", listOfConstraints) # fat, protein, cost
+                # print("The tightest constraint is:", tightestConstraint) 
 
-        # if coefficient of c is positive, maximum can still be achieved; thus, find biggest constraint on c
-        if slackForm[0][3] >= 0:
+                # find the equation where the tighest constraint was found
+                tightestConstraintEquation = listOfConstraints.index(tightestConstraint) + 1
+                # print("The equation with the tightest constraint is:", tightestConstraintEquation) # 1 = fat, 2 = protein, 3 = cost 
+                tightestConstraintC = tightestConstraintEquation
 
-            # finding tightest constraint
-            listOfConstraints = []
-            listOfConstraints.append(abs(slackForm[1][0] / slackForm[1][3])) # slackForm[1][1]
-            listOfConstraints.append(abs(slackForm[2][0] / slackForm[2][3])) # slackForm[2][1]
-            listOfConstraints.append(abs(slackForm[3][0] / slackForm[3][3])) # slackForm[3][1]
-            tightestConstraint = min(listOfConstraints)
-            # print("List of constraints:", listOfConstraints) # fat, protein, cost
-            # print("The tightest constraint is:", tightestConstraint) 
+                slackForm[tightestConstraintEquation][3] = abs(slackForm[tightestConstraintEquation][3]) # when we rearrange, we need to multiply by -1 because we're "moving to the other side"
+                # since the tighest constraint here was protein (equation 2), 30/17 = 1.7647, we rearrange e and a in the format a = constant - b - c - e
+                newEquation = [slackForm[tightestConstraintEquation][0] / slackForm[tightestConstraintEquation][3], # constant
+                            slackForm[tightestConstraintEquation][1] / slackForm[tightestConstraintEquation][3], # a
+                            slackForm[tightestConstraintEquation][2] / slackForm[tightestConstraintEquation][3], # b
+                            1,                                                                                   # c
+                            slackForm[tightestConstraintEquation][4] / slackForm[tightestConstraintEquation][3], # d
+                            slackForm[tightestConstraintEquation][5] / slackForm[tightestConstraintEquation][3], # e 
+                            slackForm[tightestConstraintEquation][6] / slackForm[tightestConstraintEquation][3]] # f
+                # print("The rearranged equation is:", newEquation) # this is the rearranged equation
 
-            # find the equation where the tighest constraint was found
-            tightestConstraintEquation = listOfConstraints.index(tightestConstraint) + 1
-            # print("The equation with the tightest constraint is:", tightestConstraintEquation) # 1 = fat, 2 = protein, 3 = cost 
-            tightestConstraintC = tightestConstraintEquation
+                slackForm2 = [  [slackForm[0][0] + slackForm[0][3] * newEquation[0], slackForm[0][1] + slackForm[0][3] * newEquation[1], slackForm[0][3] + slackForm[0][3] * newEquation[2], 0,  slackForm[0][4] + slackForm[0][3] * newEquation[4],  slackForm[0][5] + slackForm[0][3] * newEquation[5],  slackForm[0][6] + slackForm[0][3] * newEquation[6]], # calories equation
+                                [slackForm[1][0] + slackForm[1][3] * newEquation[0], slackForm[1][1] + slackForm[1][3] * newEquation[1], slackForm[1][3] + slackForm[1][3] * newEquation[2], 0,  slackForm[1][4] + slackForm[1][3] * newEquation[4],  slackForm[1][5] + slackForm[1][3] * newEquation[5],  slackForm[1][6] + slackForm[1][3] * newEquation[6]], # fat equation
+                                [slackForm[2][0] + slackForm[2][3] * newEquation[0], slackForm[2][1] + slackForm[2][3] * newEquation[1], slackForm[2][3] + slackForm[2][3] * newEquation[2], 0,  slackForm[2][4] + slackForm[2][3] * newEquation[4],  slackForm[2][5] + slackForm[2][3] * newEquation[5],  slackForm[2][6] + slackForm[2][3] * newEquation[6]]] # cost equation
 
-            slackForm[tightestConstraintEquation][3] *= -1 # when we rearrange, we need to multiply by -1 because we're "moving to the other side"
-            # since the tighest constraint here was protein (equation 2), 30/17 = 1.7647, we rearrange e and a in the format a = constant - b - c - e
-            newEquation = [slackForm[tightestConstraintEquation][0] / slackForm[tightestConstraintEquation][3], # constant
-                        slackForm[tightestConstraintEquation][1] / slackForm[tightestConstraintEquation][3], # a
-                        slackForm[tightestConstraintEquation][2] / slackForm[tightestConstraintEquation][3], # b
-                        1,                                                                                   # c
-                        slackForm[tightestConstraintEquation][4] / slackForm[tightestConstraintEquation][3], # d
-                        slackForm[tightestConstraintEquation][5] / slackForm[tightestConstraintEquation][3], # e 
-                        slackForm[tightestConstraintEquation][6] / slackForm[tightestConstraintEquation][3]] # f
-            # print("The rearranged equation is:", newEquation) # this is the rearranged equation
+                slackForm2[tightestConstraintEquation] = newEquation
+                slackForm2[tightestConstraintEquation][3] = -1
 
-            slackForm2 = [  [slackForm[0][0] + slackForm[0][3] * newEquation[0], slackForm[0][1] + slackForm[0][3] * newEquation[1], slackForm[0][3] + slackForm[0][3] * newEquation[2], 0,  slackForm[0][4] + slackForm[0][3] * newEquation[4],  slackForm[0][5] + slackForm[0][3] * newEquation[5],  slackForm[0][6] + slackForm[0][3] * newEquation[6]], # calories equation
-                            [slackForm[1][0] + slackForm[1][3] * newEquation[0], slackForm[1][1] + slackForm[1][3] * newEquation[1], slackForm[1][3] + slackForm[1][3] * newEquation[2], 0,  slackForm[1][4] + slackForm[1][3] * newEquation[4],  slackForm[1][5] + slackForm[1][3] * newEquation[5],  slackForm[1][6] + slackForm[1][3] * newEquation[6]], # fat equation
-                            [slackForm[2][0] + slackForm[2][3] * newEquation[0], slackForm[2][1] + slackForm[2][3] * newEquation[1], slackForm[2][3] + slackForm[2][3] * newEquation[2], 0,  slackForm[2][4] + slackForm[2][3] * newEquation[4],  slackForm[2][5] + slackForm[2][3] * newEquation[5],  slackForm[2][6] + slackForm[2][3] * newEquation[6]], # protein equation
-                            [slackForm[3][0] + slackForm[3][3] * newEquation[0], slackForm[3][1] + slackForm[3][3] * newEquation[1], slackForm[3][3] + slackForm[3][3] * newEquation[2], 0,  slackForm[3][4] + slackForm[3][3] * newEquation[4],  slackForm[3][5] + slackForm[3][3] * newEquation[5],  slackForm[3][6] + slackForm[3][3] * newEquation[6]]] # cost equation
+                # print(slackForm2[0])
+                # print(slackForm2[1])
+                # print(slackForm2[2])
+                # print(slackForm2[3])
+                slackForm = slackForm2
+                solution[0] = slackForm[tightestConstraintA][0]
+                if tightestConstraintB != None:
+                    solution[1] = slackForm[tightestConstraintB][0]
+                if tightestConstraintC != None:
+                    solution[2] = slackForm[tightestConstraintEquation][0]
+                # print(slackForm)
+                if tightestConstraintC == tightestConstraintA: solution[0] = 0
+                if tightestConstraintC == tightestConstraintB: solution[1] = 0
+                if tightestConstraintB == tightestConstraintA: solution[0] = 0
 
-            slackForm2[tightestConstraintEquation] = newEquation
-            slackForm2[tightestConstraintEquation][3] = -1
-
-            # print(slackForm2[0])
-            # print(slackForm2[1])
-            # print(slackForm2[2])
-            # print(slackForm2[3])
-            slackForm = slackForm2
-            solution[0] = slackForm[tightestConstraintA][0]
-            if tightestConstraintB != None:
-                solution[1] = slackForm[tightestConstraintB][0]
-            if tightestConstraintC != None:
-                solution[2] = slackForm[tightestConstraintEquation][0]
-            # print(slackForm)
-            if tightestConstraintC == tightestConstraintA: solution[0] = 0
-            if tightestConstraintC == tightestConstraintB: solution[1] = 0
-
-        totalCalories = slackForm[0][0]
-        ChickFilA.solution = solution
-        # print("FINAL SOLUTION:", solution)
-        # print("TOTAL CALORIES:", totalCalories)
+            # print(solution)
+            totalCalories = slackForm[0][0]
+            ChickFilA.solution = solution
+            # print("FINAL SOLUTION:", solution)
+            # print("TOTAL CALORIES:", totalCalories)
 
     def getCachedPhotoImage(mode, image):
         # stores a cached version of the PhotoImage in the PIL/Pillow image
@@ -571,7 +782,7 @@ class ChickFilA(PuzzleMode2):
                     while True:
                         if mode.food2Quantity == 0: break
                         elif mode.food2Quantity == None or not mode.quantityReplaced.isdigit() or float(mode.food2Quantity) > 100 or float(mode.food2Quantity) < 0:
-                            mode.food2Quantity = mode.getUserInput("How many servings?")
+                            mode.food2Quantity = mode.getUserInput("What quantity? (can be a float, but must be non negative)")
                             if mode.food2Quantity != None:
                                 mode.quantityReplaced = mode.food2Quantity.replace('.','', 1)
                         else:
@@ -586,7 +797,7 @@ class ChickFilA(PuzzleMode2):
                     while True:
                         if mode.food3Quantity == 0: break
                         elif mode.food3Quantity == None or not mode.quantityReplaced.isdigit() or float(mode.food3Quantity) > 50 or float(mode.food3Quantity) < 0:
-                            mode.food3Quantity = mode.getUserInput("How many servings?")
+                            mode.food3Quantity = mode.getUserInput("What quantity? (can be a float, but must be non negative)")
                             if mode.food3Quantity != None:
                                 mode.quantityReplaced = mode.food3Quantity.replace('.','', 1)
                         else:
@@ -596,16 +807,22 @@ class ChickFilA(PuzzleMode2):
                     mode.food3Quantity = 0
             mode.userCalories = abs(mode.fooditem1[0]) * mode.food1Quantity + abs(mode.fooditem2[0]) * mode.food2Quantity + abs(mode.fooditem3[0]) * mode.food3Quantity
             mode.userFat = abs(mode.fooditem1[1]) * mode.food1Quantity + abs(mode.fooditem2[1]) * mode.food2Quantity + abs(mode.fooditem3[1]) * mode.food3Quantity
-            mode.userProtein = abs(mode.fooditem1[2]) * mode.food1Quantity + abs(mode.fooditem2[2]) * mode.food2Quantity + abs(mode.fooditem3[2]) * mode.food3Quantity
+            if mode.num_vars == 3:
+                mode.userProtein = abs(mode.fooditem1[2]) * mode.food1Quantity + abs(mode.fooditem2[2]) * mode.food2Quantity + abs(mode.fooditem3[2]) * mode.food3Quantity
             mode.userCost = abs(mode.fooditem1[3]) * mode.food1Quantity + abs(mode.fooditem2[3]) * mode.food2Quantity + abs(mode.fooditem3[3]) * mode.food3Quantity
 
     def redrawAll(mode, canvas):
         # CITATION: https://www.chick-fil-a.com/about/who-we-are#:~:text=%E2%80%9CTo%20glorify%20God%20by%20being,Chick%2Dfil%2DA.%E2%80%9D
         canvas.create_text(mode.width/2, 25, text='Chick-fil-A Menu', font='Calibri 20 bold') # restaurant name
         canvas.create_text(mode.width/2, 50, text='"To glorify God by being a faithful steward of all that is entrusted to us and to have a positive influence on all who come into contact with Chick-fil-A."', font='Calibri 7 bold') # slogan
-        canvas.create_text(mode.width/2, 75, text=f'Objective: maximize total calories, get <={mode.totalFat}g of fat, get <={mode.totalProtein}g of protein, and spend <= ${mode.totalCost}!')
-        # canvas.create_text(mode.width/2, 100, text=f'Current Input Results: {mode.userCalories} calories, {mode.userFat}g of fat, {mode.userProtein}g of protein, for ${mode.userCost}')
-        canvas.create_text(mode.width/2, 100, text='Current Input Results: %0.2f calories, %0.2fg of fat, %0.2fg of protein, for $%0.2f' % (mode.userCalories, mode.userFat, mode.userProtein, mode.userCost))
+        if mode.num_vars == 3:
+            canvas.create_text(mode.width/2, 75, text=f'Objective: maximize total calories, get <={mode.totalFat}g of fat, get <={mode.totalProtein}g of protein, and spend <= ${mode.totalCost}!')
+            # canvas.create_text(mode.width/2, 100, text=f'Current Input Results: {mode.userCalories} calories, {mode.userFat}g of fat, {mode.userProtein}g of protein, for ${mode.userCost}')
+            canvas.create_text(mode.width/2, 100, text='Current Input Results: %0.2f calories, %0.2fg of fat, %0.2fg of protein, for $%0.2f' % (mode.userCalories, mode.userFat, mode.userProtein, mode.userCost))
+        elif mode.num_vars == 2:
+            canvas.create_text(mode.width/2, 75, text=f'Objective: maximize total calories, get <={mode.totalFat}g of fat, and spend <= ${mode.totalCost}!')
+            # canvas.create_text(mode.width/2, 100, text=f'Current Input Results: {mode.userCalories} calories, {mode.userFat}g of fat, {mode.userProtein}g of protein, for ${mode.userCost}')
+            canvas.create_text(mode.width/2, 100, text='Current Input Results: %0.2f calories, %0.2fg of fat, for $%0.2f' % (mode.userCalories, mode.userFat, mode.userCost))
         mode.displayFoods(canvas)
         solutiontoggle = 'See Solution'
         if mode.showsolution:
@@ -668,173 +885,386 @@ class McDonalds(PuzzleMode2):
             mode.app.setActiveMode(mode.app.puzzleMode2)
     
     def simplexAlgorithm(mode):
+        # CITATION: https://youtu.be/RO5477EKlXE
         mode.totalCalories =    0
-        solution =         [0, 0, 0, mode.totalFat, mode.totalProtein, mode.totalCost]
+        mode.num_vars = random.choice([2, 3])
+        if mode.num_vars == 3:
+            solution =         [0, 0, 0, mode.totalFat, mode.totalProtein, mode.totalCost]
 
-        tightestConstraintA = tightestConstraintB = tightestConstraintC = None
+            tightestConstraintA = tightestConstraintB = tightestConstraintC = None
 
-        # more simplified labels for slackForm system
-        #                calories      fat           protein       cost
-        a0, a1, a2, a3 = mode.fooditem1[0], mode.fooditem1[1], mode.fooditem1[2], mode.fooditem1[3] # 'Chick-fil-A® Chicken Biscuit' (a)
-        b0, b1, b2, b3 = mode.fooditem2[0], mode.fooditem2[1], mode.fooditem2[2], mode.fooditem2[3] # 'Hash Browns'                  (b)
-        c0, c1, c2, c3 = mode.fooditem3[0], mode.fooditem3[1], mode.fooditem3[2], mode.fooditem3[3] # 'Icedream® Cone'               (c)
+            # more simplified labels for slackForm system
+            #                calories      fat           protein       cost
+            a0, a1, a2, a3 = mode.fooditem1[0], mode.fooditem1[1], mode.fooditem1[2], mode.fooditem1[3] # 'Chick-fil-A® Chicken Biscuit' (a)
+            b0, b1, b2, b3 = mode.fooditem2[0], mode.fooditem2[1], mode.fooditem2[2], mode.fooditem2[3] # 'Hash Browns'                  (b)
+            c0, c1, c2, c3 = mode.fooditem3[0], mode.fooditem3[1], mode.fooditem3[2], mode.fooditem3[3] # 'Icedream® Cone'               (c)
 
-        # slackForm linear system, objective function is slackForm[0], to be maximized
-        #             constant       a   b   c    d   e   f
-        slackForm = [[mode.totalCalories, a0, b0, c0,  0,  0,  0], # calories equation
-                    [mode.totalFat,      a1, b1, c1, -1,  0,  0], # fat equation
-                    [mode.totalProtein,  a2, b2, c2,  0, -1,  0], # protein equation
-                    [mode.totalCost,     a3, b3, c3,  0,  0, -1]] # cost equation
+            # slackForm linear system, objective function is slackForm[0], to be maximized
+            #             constant       a   b   c    d   e   f
+            slackForm = [[mode.totalCalories, a0, b0, c0,  0,  0,  0], # calories equation
+                        [mode.totalFat,      a1, b1, c1, -1,  0,  0], # fat equation
+                        [mode.totalProtein,  a2, b2, c2,  0, -1,  0], # protein equation
+                        [mode.totalCost,     a3, b3, c3,  0,  0, -1]] # cost equation
 
-        # if coefficient of a is positive, maximum can still be achieved; thus, find biggest constraint on a
-        if slackForm[0][1] >= 0:
+            # yes, I brute forced the simplex algorithm, the main difference is the basic variable being reviewed
+            # in one of the steps of each pivot, it may be necessary to set the columns of the variable equal to 1 because the variable is being "eliminated"
+            # since one equation would set the basic variable as the non basic variable and it is substituted into every other equation
+
+            # if coefficient of a is positive, maximum can still be achieved; thus, find biggest constraint on a
+            if slackForm[0][1] >= 0:
+                
+                # finding tightest constraint
+                listOfConstraints = []
+                if (slackForm[1][0] / slackForm[1][1]) < 0:
+                    listOfConstraints.append(-1*(slackForm[1][0] / slackForm[1][1])) # slackForm[1][1]
+                else:
+                    listOfConstraints.append(100)
+                if (slackForm[2][0] / slackForm[2][1]) < 0:
+                    listOfConstraints.append(-1*(slackForm[2][0] / slackForm[2][1])) # slackForm[2][1]
+                else:
+                    listOfConstraints.append(100)
+                if (slackForm[3][0] / slackForm[3][1]) < 0:
+                    listOfConstraints.append(-1*(slackForm[3][0] / slackForm[3][1])) # slackForm[3][1]
+                else:
+                    listOfConstraints.append(100)
+                tightestConstraint = min(listOfConstraints)
+                # print("List of constraints:", listOfConstraints) # fat, protein, cost
+                # print("The tightest constraint is:", tightestConstraint) 
+
+                # find the equation where the tightest constraint was found
+                tightestConstraintEquation = listOfConstraints.index(tightestConstraint) + 1
+                # print("The equation with the tightest constraint is:", tightestConstraintEquation) # 1 = fat, 2 = protein, 3 = cost 
+                tightestConstraintA = tightestConstraintEquation
+
+                slackForm[tightestConstraintEquation][1] *= -1 # when we rearrange, we need to multiply by -1 because we're "moving to the other side"
+                # since the tighest constraint here was protein (equation 2), 30/17 = 1.7647, we rearrange e and a in the format a = constant - b - c - e
+                newEquation = [slackForm[tightestConstraintEquation][0] / slackForm[tightestConstraintEquation][1], # constant
+                            1,                                                                                   # a
+                            slackForm[tightestConstraintEquation][2] / slackForm[tightestConstraintEquation][1], # b
+                            slackForm[tightestConstraintEquation][3] / slackForm[tightestConstraintEquation][1], # c
+                            slackForm[tightestConstraintEquation][4] / slackForm[tightestConstraintEquation][1], # d
+                            slackForm[tightestConstraintEquation][5] / slackForm[tightestConstraintEquation][1], # e 
+                            slackForm[tightestConstraintEquation][6] / slackForm[tightestConstraintEquation][1]] # f
+                # print("The rearranged equation is:", newEquation) # this is the rearranged equation
+
+                # where the substituion occurs
+                slackForm2 = [  [slackForm[0][0] + slackForm[0][1] * newEquation[0], 0, slackForm[0][2] + slackForm[0][1] * newEquation[2], slackForm[0][3] + slackForm[0][1] * newEquation[3],  slackForm[0][4] + slackForm[0][1] * newEquation[4],  slackForm[0][5] + slackForm[0][1] * newEquation[5],  slackForm[0][6] + slackForm[0][1] * newEquation[6]], # calories equation
+                                [slackForm[1][0] + slackForm[1][1] * newEquation[0], 0, slackForm[1][2] + slackForm[1][1] * newEquation[2], slackForm[1][3] + slackForm[1][1] * newEquation[3],  slackForm[1][4] + slackForm[1][1] * newEquation[4],  slackForm[1][5] + slackForm[1][1] * newEquation[5],  slackForm[1][6] + slackForm[1][1] * newEquation[6]], # fat equation
+                                [slackForm[2][0] + slackForm[2][1] * newEquation[0], 0, slackForm[2][2] + slackForm[2][1] * newEquation[2], slackForm[2][3] + slackForm[2][1] * newEquation[3],  slackForm[2][4] + slackForm[2][1] * newEquation[4],  slackForm[2][5] + slackForm[2][1] * newEquation[5],  slackForm[2][6] + slackForm[2][1] * newEquation[6]], # protein equation
+                                [slackForm[3][0] + slackForm[3][1] * newEquation[0], 0, slackForm[3][2] + slackForm[3][1] * newEquation[2], slackForm[3][3] + slackForm[3][1] * newEquation[3],  slackForm[3][4] + slackForm[3][1] * newEquation[4],  slackForm[3][5] + slackForm[3][1] * newEquation[5],  slackForm[3][6] + slackForm[3][1] * newEquation[6]]] # cost equation
+
+                slackForm2[tightestConstraintEquation] = newEquation
+                slackForm2[tightestConstraintEquation][1] = -1
+
+                # print(slackForm2[0])
+                # print(slackForm2[1])
+                # print(slackForm2[2])
+                # print(slackForm2[3])
+                slackForm = slackForm2
+                solution[0] = slackForm[tightestConstraintEquation][0]
+                # print("Current solution is:", solution)
+                # print(slackForm)
             
-            # finding tightest constraint
-            listOfConstraints = []
-            listOfConstraints.append(abs(slackForm[1][0] / slackForm[1][1])) # slackForm[1][1]
-            listOfConstraints.append(abs(slackForm[2][0] / slackForm[2][1])) # slackForm[2][1]
-            listOfConstraints.append(abs(slackForm[3][0] / slackForm[3][1])) # slackForm[3][1]
-            tightestConstraint = min(listOfConstraints)
-            # print("List of constraints:", listOfConstraints) # fat, protein, cost
-            # print("The tightest constraint is:", tightestConstraint) 
+            # if coefficient of b is positive, maximum can still be achieved; thus, find biggest constraint on b
+            if slackForm[0][2] >= 0:
 
-            # find the equation where the tightest constraint was found
-            tightestConstraintEquation = listOfConstraints.index(tightestConstraint) + 1
-            # print("The equation with the tightest constraint is:", tightestConstraintEquation) # 1 = fat, 2 = protein, 3 = cost 
-            tightestConstraintA = tightestConstraintEquation
+                # finding tightest constraint
+                listOfConstraints = []
+                if (slackForm[1][0] / slackForm[1][2]) < 0:
+                    listOfConstraints.append(-1*(slackForm[1][0] / slackForm[1][2])) # slackForm[1][1]
+                else:
+                    listOfConstraints.append(100)
+                if (slackForm[2][0] / slackForm[2][2]) < 0:
+                    listOfConstraints.append(-1*(slackForm[2][0] / slackForm[2][2])) # slackForm[2][1]
+                else:
+                    listOfConstraints.append(100)
+                if (slackForm[3][0] / slackForm[3][2]) < 0:
+                    listOfConstraints.append(-1*(slackForm[3][0] / slackForm[3][2])) # slackForm[3][1]
+                else:
+                    listOfConstraints.append(100)
+                tightestConstraint = min(listOfConstraints)
+                # print("List of constraints:", listOfConstraints) # fat, protein, cost
+                # print("The tightest constraint is:", tightestConstraint) 
 
-            slackForm[tightestConstraintEquation][1] *= -1 # when we rearrange, we need to multiply by -1 because we're "moving to the other side"
-            # since the tighest constraint here was protein (equation 2), 30/17 = 1.7647, we rearrange e and a in the format a = constant - b - c - e
-            newEquation = [slackForm[tightestConstraintEquation][0] / slackForm[tightestConstraintEquation][1], # constant
-                        1,                                                                                   # a
-                        slackForm[tightestConstraintEquation][2] / slackForm[tightestConstraintEquation][1], # b
-                        slackForm[tightestConstraintEquation][3] / slackForm[tightestConstraintEquation][1], # c
-                        slackForm[tightestConstraintEquation][4] / slackForm[tightestConstraintEquation][1], # d
-                        slackForm[tightestConstraintEquation][5] / slackForm[tightestConstraintEquation][1], # e 
-                        slackForm[tightestConstraintEquation][6] / slackForm[tightestConstraintEquation][1]] # f
-            # print("The rearranged equation is:", newEquation) # this is the rearranged equation
+                # find the equation where the tighest constraint was found
+                tightestConstraintEquation = listOfConstraints.index(tightestConstraint) + 1
+                # print("The equation with the tightest constraint is:", tightestConstraintEquation) # 1 = fat, 2 = protein, 3 = cost 
+                tightestConstraintB = tightestConstraintEquation
 
-            slackForm2 = [  [slackForm[0][0] + slackForm[0][1] * newEquation[0], 0, slackForm[0][2] + slackForm[0][1] * newEquation[2], slackForm[0][3] + slackForm[0][1] * newEquation[3],  slackForm[0][4] + slackForm[0][1] * newEquation[4],  slackForm[0][5] + slackForm[0][1] * newEquation[5],  slackForm[0][6] + slackForm[0][1] * newEquation[6]], # calories equation
-                            [slackForm[1][0] + slackForm[1][1] * newEquation[0], 0, slackForm[1][2] + slackForm[1][1] * newEquation[2], slackForm[1][3] + slackForm[1][1] * newEquation[3],  slackForm[1][4] + slackForm[1][1] * newEquation[4],  slackForm[1][5] + slackForm[1][1] * newEquation[5],  slackForm[1][6] + slackForm[1][1] * newEquation[6]], # fat equation
-                            [slackForm[2][0] + slackForm[2][1] * newEquation[0], 0, slackForm[2][2] + slackForm[2][1] * newEquation[2], slackForm[2][3] + slackForm[2][1] * newEquation[3],  slackForm[2][4] + slackForm[2][1] * newEquation[4],  slackForm[2][5] + slackForm[2][1] * newEquation[5],  slackForm[2][6] + slackForm[2][1] * newEquation[6]], # protein equation
-                            [slackForm[3][0] + slackForm[3][1] * newEquation[0], 0, slackForm[3][2] + slackForm[3][1] * newEquation[2], slackForm[3][3] + slackForm[3][1] * newEquation[3],  slackForm[3][4] + slackForm[3][1] * newEquation[4],  slackForm[3][5] + slackForm[3][1] * newEquation[5],  slackForm[3][6] + slackForm[3][1] * newEquation[6]]] # cost equation
+                slackForm[tightestConstraintEquation][2] *= -1 # when we rearrange, we need to multiply by -1 because we're "moving to the other side"
+                # since the tighest constraint here was protein (equation 2), 30/17 = 1.7647, we rearrange e and a in the format a = constant - b - c - e
+                newEquation = [slackForm[tightestConstraintEquation][0] / slackForm[tightestConstraintEquation][2], # constant
+                            slackForm[tightestConstraintEquation][1] / slackForm[tightestConstraintEquation][2], # a
+                            1,                                                                                   # b
+                            slackForm[tightestConstraintEquation][3] / slackForm[tightestConstraintEquation][2], # c
+                            slackForm[tightestConstraintEquation][4] / slackForm[tightestConstraintEquation][2], # d
+                            slackForm[tightestConstraintEquation][5] / slackForm[tightestConstraintEquation][2], # e 
+                            slackForm[tightestConstraintEquation][6] / slackForm[tightestConstraintEquation][2]] # f
+                # print("The rearranged equation is:", newEquation) # this is the rearranged equation
 
-            slackForm2[tightestConstraintEquation] = newEquation
-            slackForm2[tightestConstraintEquation][1] = -1
+                slackForm2 = [  [slackForm[0][0] + slackForm[0][2] * newEquation[0], slackForm[0][1] + slackForm[0][2] * newEquation[1], 0, slackForm[0][3] + slackForm[0][2] * newEquation[3],  slackForm[0][4] + slackForm[0][2] * newEquation[4],  slackForm[0][5] + slackForm[0][2] * newEquation[5],  slackForm[0][6] + slackForm[0][2] * newEquation[6]], # calories equation
+                                [slackForm[1][0] + slackForm[1][2] * newEquation[0], slackForm[1][1] + slackForm[1][2] * newEquation[1], 0, slackForm[1][3] + slackForm[1][2] * newEquation[3],  slackForm[1][4] + slackForm[1][2] * newEquation[4],  slackForm[1][5] + slackForm[1][2] * newEquation[5],  slackForm[1][6] + slackForm[1][2] * newEquation[6]], # fat equation
+                                [slackForm[2][0] + slackForm[2][2] * newEquation[0], slackForm[2][1] + slackForm[2][2] * newEquation[1], 0, slackForm[2][3] + slackForm[2][2] * newEquation[3],  slackForm[2][4] + slackForm[2][2] * newEquation[4],  slackForm[2][5] + slackForm[2][2] * newEquation[5],  slackForm[2][6] + slackForm[2][2] * newEquation[6]], # protein equation
+                                [slackForm[3][0] + slackForm[3][2] * newEquation[0], slackForm[3][1] + slackForm[3][2] * newEquation[1], 0, slackForm[3][3] + slackForm[3][2] * newEquation[3],  slackForm[3][4] + slackForm[3][2] * newEquation[4],  slackForm[3][5] + slackForm[3][2] * newEquation[5],  slackForm[3][6] + slackForm[3][2] * newEquation[6]]] # cost equation
 
-            # print(slackForm2[0])
-            # print(slackForm2[1])
-            # print(slackForm2[2])
-            # print(slackForm2[3])
-            slackForm = slackForm2
-            solution[0] = slackForm[tightestConstraintEquation][0]
-            # print("Current solution is:", solution)
-            # print(slackForm)
-        
-        # if coefficient of b is positive, maximum can still be achieved; thus, find biggest constraint on b
-        if slackForm[0][2] >= 0:
+                slackForm2[tightestConstraintEquation] = newEquation
+                slackForm2[tightestConstraintEquation][2] = -1
+                
 
-            # finding tightest constraint
-            listOfConstraints = []
-            listOfConstraints.append(abs(slackForm[1][0] / slackForm[1][2])) # slackForm[1][1]
-            listOfConstraints.append(abs(slackForm[2][0] / slackForm[2][2])) # slackForm[2][1]
-            listOfConstraints.append(abs(slackForm[3][0] / slackForm[3][2])) # slackForm[3][1]
-            tightestConstraint = min(listOfConstraints)
-            # print("List of constraints:", listOfConstraints) # fat, protein, cost
-            # print("The tightest constraint is:", tightestConstraint) 
+                # print(slackForm2[0])
+                # print(slackForm2[1])
+                # print(slackForm2[2])
+                # print(slackForm2[3])
+                
+                slackForm = slackForm2
+                solution[0] = slackForm[tightestConstraintA][0]
+                solution[1] = slackForm[tightestConstraintEquation][0]
+                tightestConstraintB = tightestConstraintEquation
+                # print(slackForm)
+                if tightestConstraintB == tightestConstraintA: solution[0] = 0
 
-            # find the equation where the tighest constraint was found
-            tightestConstraintEquation = listOfConstraints.index(tightestConstraint) + 1
-            # print("The equation with the tightest constraint is:", tightestConstraintEquation) # 1 = fat, 2 = protein, 3 = cost 
-            tightestConstraintB = tightestConstraintEquation
+            # if coefficient of c is positive, maximum can still be achieved; thus, find biggest constraint on c
+            if slackForm[0][3] >= 0:
 
-            slackForm[tightestConstraintEquation][2] *= -1 # when we rearrange, we need to multiply by -1 because we're "moving to the other side"
-            # since the tighest constraint here was protein (equation 2), 30/17 = 1.7647, we rearrange e and a in the format a = constant - b - c - e
-            newEquation = [slackForm[tightestConstraintEquation][0] / slackForm[tightestConstraintEquation][2], # constant
-                        slackForm[tightestConstraintEquation][1] / slackForm[tightestConstraintEquation][2], # a
-                        1,                                                                                   # b
-                        slackForm[tightestConstraintEquation][3] / slackForm[tightestConstraintEquation][2], # c
-                        slackForm[tightestConstraintEquation][4] / slackForm[tightestConstraintEquation][2], # d
-                        slackForm[tightestConstraintEquation][5] / slackForm[tightestConstraintEquation][2], # e 
-                        slackForm[tightestConstraintEquation][6] / slackForm[tightestConstraintEquation][2]] # f
-            # print("The rearranged equation is:", newEquation) # this is the rearranged equation
+                # finding tightest constraint
+                listOfConstraints = []
+                if (slackForm[1][0] / slackForm[1][3]) < 0:
+                    listOfConstraints.append(-1*(slackForm[1][0] / slackForm[1][3])) # slackForm[1][1]
+                else:
+                    listOfConstraints.append(100)
+                if (slackForm[2][0] / slackForm[2][3]) < 0:
+                    listOfConstraints.append(-1*(slackForm[2][0] / slackForm[2][3])) # slackForm[2][1]
+                else:
+                    listOfConstraints.append(100)
+                if (slackForm[3][0] / slackForm[3][3]) < 0:
+                    listOfConstraints.append(-1*(slackForm[3][0] / slackForm[3][3])) # slackForm[3][1]
+                else:
+                    listOfConstraints.append(100)
+                tightestConstraint = min(listOfConstraints)
+                # print("List of constraints:", listOfConstraints) # fat, protein, cost
+                # print("The tightest constraint is:", tightestConstraint) 
 
-            slackForm2 = [  [slackForm[0][0] + slackForm[0][2] * newEquation[0], slackForm[0][1] + slackForm[0][2] * newEquation[1], 0, slackForm[0][3] + slackForm[0][2] * newEquation[3],  slackForm[0][4] + slackForm[0][2] * newEquation[4],  slackForm[0][5] + slackForm[0][2] * newEquation[5],  slackForm[0][6] + slackForm[0][2] * newEquation[6]], # calories equation
-                            [slackForm[1][0] + slackForm[1][2] * newEquation[0], slackForm[1][1] + slackForm[1][2] * newEquation[1], 0, slackForm[1][3] + slackForm[1][2] * newEquation[3],  slackForm[1][4] + slackForm[1][2] * newEquation[4],  slackForm[1][5] + slackForm[1][2] * newEquation[5],  slackForm[1][6] + slackForm[1][2] * newEquation[6]], # fat equation
-                            [slackForm[2][0] + slackForm[2][2] * newEquation[0], slackForm[2][1] + slackForm[2][2] * newEquation[1], 0, slackForm[2][3] + slackForm[2][2] * newEquation[3],  slackForm[2][4] + slackForm[2][2] * newEquation[4],  slackForm[2][5] + slackForm[2][2] * newEquation[5],  slackForm[2][6] + slackForm[2][2] * newEquation[6]], # protein equation
-                            [slackForm[3][0] + slackForm[3][2] * newEquation[0], slackForm[3][1] + slackForm[3][2] * newEquation[1], 0, slackForm[3][3] + slackForm[3][2] * newEquation[3],  slackForm[3][4] + slackForm[3][2] * newEquation[4],  slackForm[3][5] + slackForm[3][2] * newEquation[5],  slackForm[3][6] + slackForm[3][2] * newEquation[6]]] # cost equation
+                # find the equation where the tighest constraint was found
+                tightestConstraintEquation = listOfConstraints.index(tightestConstraint) + 1
+                # print("The equation with the tightest constraint is:", tightestConstraintEquation) # 1 = fat, 2 = protein, 3 = cost 
+                tightestConstraintC = tightestConstraintEquation
 
-            slackForm2[tightestConstraintEquation] = newEquation
-            slackForm2[tightestConstraintEquation][2] = -1
+                slackForm[tightestConstraintEquation][3] *= -1 # when we rearrange, we need to multiply by -1 because we're "moving to the other side"
+                # since the tighest constraint here was protein (equation 2), 30/17 = 1.7647, we rearrange e and a in the format a = constant - b - c - e
+                newEquation = [slackForm[tightestConstraintEquation][0] / slackForm[tightestConstraintEquation][3], # constant
+                            slackForm[tightestConstraintEquation][1] / slackForm[tightestConstraintEquation][3], # a
+                            slackForm[tightestConstraintEquation][2] / slackForm[tightestConstraintEquation][3], # b
+                            1,                                                                                   # c
+                            slackForm[tightestConstraintEquation][4] / slackForm[tightestConstraintEquation][3], # d
+                            slackForm[tightestConstraintEquation][5] / slackForm[tightestConstraintEquation][3], # e 
+                            slackForm[tightestConstraintEquation][6] / slackForm[tightestConstraintEquation][3]] # f
+                # print("The rearranged equation is:", newEquation) # this is the rearranged equation
+
+                slackForm2 = [  [slackForm[0][0] + slackForm[0][3] * newEquation[0], slackForm[0][1] + slackForm[0][3] * newEquation[1], slackForm[0][3] + slackForm[0][3] * newEquation[2], 0,  slackForm[0][4] + slackForm[0][3] * newEquation[4],  slackForm[0][5] + slackForm[0][3] * newEquation[5],  slackForm[0][6] + slackForm[0][3] * newEquation[6]], # calories equation
+                                [slackForm[1][0] + slackForm[1][3] * newEquation[0], slackForm[1][1] + slackForm[1][3] * newEquation[1], slackForm[1][3] + slackForm[1][3] * newEquation[2], 0,  slackForm[1][4] + slackForm[1][3] * newEquation[4],  slackForm[1][5] + slackForm[1][3] * newEquation[5],  slackForm[1][6] + slackForm[1][3] * newEquation[6]], # fat equation
+                                [slackForm[2][0] + slackForm[2][3] * newEquation[0], slackForm[2][1] + slackForm[2][3] * newEquation[1], slackForm[2][3] + slackForm[2][3] * newEquation[2], 0,  slackForm[2][4] + slackForm[2][3] * newEquation[4],  slackForm[2][5] + slackForm[2][3] * newEquation[5],  slackForm[2][6] + slackForm[2][3] * newEquation[6]], # protein equation
+                                [slackForm[3][0] + slackForm[3][3] * newEquation[0], slackForm[3][1] + slackForm[3][3] * newEquation[1], slackForm[3][3] + slackForm[3][3] * newEquation[2], 0,  slackForm[3][4] + slackForm[3][3] * newEquation[4],  slackForm[3][5] + slackForm[3][3] * newEquation[5],  slackForm[3][6] + slackForm[3][3] * newEquation[6]]] # cost equation
+
+                slackForm2[tightestConstraintEquation] = newEquation
+                slackForm2[tightestConstraintEquation][3] = -1
+
+                # print(slackForm2[0])
+                # print(slackForm2[1])
+                # print(slackForm2[2])
+                # print(slackForm2[3])
+                slackForm = slackForm2
+                solution[0] = slackForm[tightestConstraintA][0]
+                if tightestConstraintB != None:
+                    solution[1] = slackForm[tightestConstraintB][0]
+                if tightestConstraintC != None:
+                    solution[2] = slackForm[tightestConstraintEquation][0]
+                # print(slackForm)
+                if tightestConstraintC == tightestConstraintA: solution[0] = 0
+                if tightestConstraintC == tightestConstraintB: solution[1] = 0
+                if tightestConstraintB == tightestConstraintA: solution[0] = 0
+
+            totalCalories = slackForm[0][0]
+            McDonalds.solution = solution
+            # print("FINAL SOLUTION:", solution)
+            # print("TOTAL CALORIES:", totalCalories)
+        elif mode.num_vars == 2:
+            solution =         [0, 0, 0, mode.totalFat, mode.totalCost]
+
+            tightestConstraintA = tightestConstraintB = tightestConstraintC = None
+
+            # more simplified labels for slackForm system
+            #                calories      fat           protein       cost
+            a0, a1, a2, a3 = mode.fooditem1[0], mode.fooditem1[1], mode.fooditem1[2], mode.fooditem1[3] # 'Chick-fil-A® Chicken Biscuit' (a)
+            b0, b1, b2, b3 = mode.fooditem2[0], mode.fooditem2[1], mode.fooditem2[2], mode.fooditem2[3] # 'Hash Browns'                  (b)
+            c0, c1, c2, c3 = mode.fooditem3[0], mode.fooditem3[1], mode.fooditem3[2], mode.fooditem3[3] # 'Icedream® Cone'               (c)
+
+            # slackForm linear system, objective function is slackForm[0], to be maximized
+            #             constant       a   b   c    d   e   f
+            slackForm = [[mode.totalCalories, a0, b0, c0,  0,  0,  0], # calories equation
+                        [mode.totalFat,      a1, b1, c1, -1,  0,  0], # fat equation
+                        [mode.totalCost,     a3, b3, c3,  0,  0, -1]] # cost equation
+            # if coefficient of a is positive, maximum can still be achieved; thus, find biggest constraint on a
+            if slackForm[0][1] >= 0:
+                
+                # finding tightest constraint
+                listOfConstraints = []
+                if (slackForm[1][0] / slackForm[1][1]) < 0:
+                    listOfConstraints.append(-1*(slackForm[1][0] / slackForm[1][1])) # slackForm[1][1]
+                else:
+                    listOfConstraints.append(100)
+                if (slackForm[2][0] / slackForm[2][1]) < 0:
+                    listOfConstraints.append(-1*(slackForm[2][0] / slackForm[2][1])) # slackForm[2][1]
+                else:
+                    listOfConstraints.append(100)
+                tightestConstraint = min(listOfConstraints)
+                # print("List of constraints:", listOfConstraints) # fat, protein, cost
+                # print("The tightest constraint is:", tightestConstraint) 
+
+                # find the equation where the tightest constraint was found
+                tightestConstraintEquation = listOfConstraints.index(tightestConstraint) + 1
+                # print("The equation with the tightest constraint is:", tightestConstraintEquation) # 1 = fat, 2 = protein, 3 = cost 
+                tightestConstraintA = tightestConstraintEquation
+
+                slackForm[tightestConstraintEquation][1] = abs(slackForm[tightestConstraintEquation][1]) # when we rearrange, we need to multiply by -1 because we're "moving to the other side"
+                # since the tighest constraint here was protein (equation 2), 30/17 = 1.7647, we rearrange e and a in the format a = constant - b - c - e
+                newEquation = [slackForm[tightestConstraintEquation][0] / slackForm[tightestConstraintEquation][1], # constant
+                            1,                                                                                   # a
+                            slackForm[tightestConstraintEquation][2] / slackForm[tightestConstraintEquation][1], # b
+                            slackForm[tightestConstraintEquation][3] / slackForm[tightestConstraintEquation][1], # c
+                            slackForm[tightestConstraintEquation][4] / slackForm[tightestConstraintEquation][1], # d
+                            slackForm[tightestConstraintEquation][5] / slackForm[tightestConstraintEquation][1], # e 
+                            slackForm[tightestConstraintEquation][6] / slackForm[tightestConstraintEquation][1]] # f
+                # print("The rearranged equation is:", newEquation) # this is the rearranged equation
+
+                # where the substituion occurs
+                slackForm2 = [  [slackForm[0][0] + slackForm[0][1] * newEquation[0], 0, slackForm[0][2] + slackForm[0][1] * newEquation[2], slackForm[0][3] + slackForm[0][1] * newEquation[3],  slackForm[0][4] + slackForm[0][1] * newEquation[4],  slackForm[0][5] + slackForm[0][1] * newEquation[5],  slackForm[0][6] + slackForm[0][1] * newEquation[6]], # calories equation
+                                [slackForm[1][0] + slackForm[1][1] * newEquation[0], 0, slackForm[1][2] + slackForm[1][1] * newEquation[2], slackForm[1][3] + slackForm[1][1] * newEquation[3],  slackForm[1][4] + slackForm[1][1] * newEquation[4],  slackForm[1][5] + slackForm[1][1] * newEquation[5],  slackForm[1][6] + slackForm[1][1] * newEquation[6]], # fat equation
+                                [slackForm[2][0] + slackForm[2][1] * newEquation[0], 0, slackForm[2][2] + slackForm[2][1] * newEquation[2], slackForm[2][3] + slackForm[2][1] * newEquation[3],  slackForm[2][4] + slackForm[2][1] * newEquation[4],  slackForm[2][5] + slackForm[2][1] * newEquation[5],  slackForm[2][6] + slackForm[2][1] * newEquation[6]]] # cost equation
+
+                slackForm2[tightestConstraintEquation] = newEquation
+                slackForm2[tightestConstraintEquation][1] = -1
+
+                # print(slackForm2[0])
+                # print(slackForm2[1])
+                # print(slackForm2[2])
+                # print(slackForm2[3])
+                slackForm = slackForm2
+                solution[0] = slackForm[tightestConstraintEquation][0]
+                # print("Current solution is:", solution)
+                # print(slackForm)
+
+            # if coefficient of b is positive, maximum can still be achieved; thus, find biggest constraint on b
+            if slackForm[0][2] >= 0:
+
+                # finding tightest constraint
+                listOfConstraints = []
+                if (slackForm[1][0] / slackForm[1][2]) < 0:
+                    listOfConstraints.append(-1*(slackForm[1][0] / slackForm[1][2])) # slackForm[1][1]
+                else:
+                    listOfConstraints.append(100)
+                if (slackForm[2][0] / slackForm[2][2]) < 0:
+                    listOfConstraints.append(-1*(slackForm[2][0] / slackForm[2][2])) # slackForm[2][1]
+                else:
+                    listOfConstraints.append(100)
+                tightestConstraint = min(listOfConstraints)
+                # print("List of constraints:", listOfConstraints) # fat, protein, cost
+                # print("The tightest constraint is:", tightestConstraint) 
+
+                # find the equation where the tighest constraint was found
+                tightestConstraintEquation = listOfConstraints.index(tightestConstraint) + 1
+                # print("The equation with the tightest constraint is:", tightestConstraintEquation) # 1 = fat, 2 = protein, 3 = cost 
+                tightestConstraintB = tightestConstraintEquation
+
+                slackForm[tightestConstraintEquation][2] = abs(slackForm[tightestConstraintEquation][2]) # when we rearrange, we need to multiply by -1 because we're "moving to the other side"
+                # since the tighest constraint here was protein (equation 2), 30/17 = 1.7647, we rearrange e and a in the format a = constant - b - c - e
+                newEquation = [slackForm[tightestConstraintEquation][0] / slackForm[tightestConstraintEquation][2], # constant
+                            slackForm[tightestConstraintEquation][1] / slackForm[tightestConstraintEquation][2], # a
+                            1,                                                                                   # b
+                            slackForm[tightestConstraintEquation][3] / slackForm[tightestConstraintEquation][2], # c
+                            slackForm[tightestConstraintEquation][4] / slackForm[tightestConstraintEquation][2], # d
+                            slackForm[tightestConstraintEquation][5] / slackForm[tightestConstraintEquation][2], # e 
+                            slackForm[tightestConstraintEquation][6] / slackForm[tightestConstraintEquation][2]] # f
+                # print("The rearranged equation is:", newEquation) # this is the rearranged equation
+
+                slackForm2 = [  [slackForm[0][0] + slackForm[0][2] * newEquation[0], slackForm[0][1] + slackForm[0][2] * newEquation[1], 0, slackForm[0][3] + slackForm[0][2] * newEquation[3],  slackForm[0][4] + slackForm[0][2] * newEquation[4],  slackForm[0][5] + slackForm[0][2] * newEquation[5],  slackForm[0][6] + slackForm[0][2] * newEquation[6]], # calories equation
+                                [slackForm[1][0] + slackForm[1][2] * newEquation[0], slackForm[1][1] + slackForm[1][2] * newEquation[1], 0, slackForm[1][3] + slackForm[1][2] * newEquation[3],  slackForm[1][4] + slackForm[1][2] * newEquation[4],  slackForm[1][5] + slackForm[1][2] * newEquation[5],  slackForm[1][6] + slackForm[1][2] * newEquation[6]], # fat equation
+                                [slackForm[2][0] + slackForm[2][2] * newEquation[0], slackForm[2][1] + slackForm[2][2] * newEquation[1], 0, slackForm[2][3] + slackForm[2][2] * newEquation[3],  slackForm[2][4] + slackForm[2][2] * newEquation[4],  slackForm[2][5] + slackForm[2][2] * newEquation[5],  slackForm[2][6] + slackForm[2][2] * newEquation[6]]] # cost equation
+
+                slackForm2[tightestConstraintEquation] = newEquation
+                slackForm2[tightestConstraintEquation][2] = -1
+                
+
+                # print(slackForm2[0])
+                # print(slackForm2[1])
+                # print(slackForm2[2])
+                # print(slackForm2[3])
+                
+                slackForm = slackForm2
+                solution[0] = slackForm[tightestConstraintA][0]
+                solution[1] = slackForm[tightestConstraintEquation][0]
+                tightestConstraintB = tightestConstraintEquation
+                # print(slackForm)
+                if tightestConstraintB == tightestConstraintA: solution[0] = 0
             
+            # if coefficient of c is positive, maximum can still be achieved; thus, find biggest constraint on c
+            if slackForm[0][3] >= 0:
 
-            # print(slackForm2[0])
-            # print(slackForm2[1])
-            # print(slackForm2[2])
-            # print(slackForm2[3])
-            
-            slackForm = slackForm2
-            solution[0] = slackForm[tightestConstraintA][0]
-            solution[1] = slackForm[tightestConstraintEquation][0]
-            tightestConstraintB = tightestConstraintEquation
-            # print(slackForm)
-            if tightestConstraintB == tightestConstraintA: solution[0] = 0
+                # finding tightest constraint
+                listOfConstraints = []
+                if (slackForm[1][0] / slackForm[1][3]) < 0:
+                    listOfConstraints.append(-1*(slackForm[1][0] / slackForm[1][3])) # slackForm[1][1]
+                else:
+                    listOfConstraints.append(100)
+                if (slackForm[2][0] / slackForm[2][3]) < 0:
+                    listOfConstraints.append(-1*(slackForm[2][0] / slackForm[2][3])) # slackForm[2][1]
+                else:
+                    listOfConstraints.append(100)
+                tightestConstraint = min(listOfConstraints)
+                # print("List of constraints:", listOfConstraints) # fat, protein, cost
+                # print("The tightest constraint is:", tightestConstraint) 
 
-        # if coefficient of c is positive, maximum can still be achieved; thus, find biggest constraint on c
-        if slackForm[0][3] >= 0:
+                # find the equation where the tighest constraint was found
+                tightestConstraintEquation = listOfConstraints.index(tightestConstraint) + 1
+                # print("The equation with the tightest constraint is:", tightestConstraintEquation) # 1 = fat, 2 = protein, 3 = cost 
+                tightestConstraintC = tightestConstraintEquation
 
-            # finding tightest constraint
-            listOfConstraints = []
-            listOfConstraints.append(abs(slackForm[1][0] / slackForm[1][3])) # slackForm[1][1]
-            listOfConstraints.append(abs(slackForm[2][0] / slackForm[2][3])) # slackForm[2][1]
-            listOfConstraints.append(abs(slackForm[3][0] / slackForm[3][3])) # slackForm[3][1]
-            tightestConstraint = min(listOfConstraints)
-            # print("List of constraints:", listOfConstraints) # fat, protein, cost
-            # print("The tightest constraint is:", tightestConstraint) 
+                slackForm[tightestConstraintEquation][3] = abs(slackForm[tightestConstraintEquation][3]) # when we rearrange, we need to multiply by -1 because we're "moving to the other side"
+                # since the tighest constraint here was protein (equation 2), 30/17 = 1.7647, we rearrange e and a in the format a = constant - b - c - e
+                newEquation = [slackForm[tightestConstraintEquation][0] / slackForm[tightestConstraintEquation][3], # constant
+                            slackForm[tightestConstraintEquation][1] / slackForm[tightestConstraintEquation][3], # a
+                            slackForm[tightestConstraintEquation][2] / slackForm[tightestConstraintEquation][3], # b
+                            1,                                                                                   # c
+                            slackForm[tightestConstraintEquation][4] / slackForm[tightestConstraintEquation][3], # d
+                            slackForm[tightestConstraintEquation][5] / slackForm[tightestConstraintEquation][3], # e 
+                            slackForm[tightestConstraintEquation][6] / slackForm[tightestConstraintEquation][3]] # f
+                # print("The rearranged equation is:", newEquation) # this is the rearranged equation
 
-            # find the equation where the tighest constraint was found
-            tightestConstraintEquation = listOfConstraints.index(tightestConstraint) + 1
-            # print("The equation with the tightest constraint is:", tightestConstraintEquation) # 1 = fat, 2 = protein, 3 = cost 
-            tightestConstraintC = tightestConstraintEquation
+                slackForm2 = [  [slackForm[0][0] + slackForm[0][3] * newEquation[0], slackForm[0][1] + slackForm[0][3] * newEquation[1], slackForm[0][3] + slackForm[0][3] * newEquation[2], 0,  slackForm[0][4] + slackForm[0][3] * newEquation[4],  slackForm[0][5] + slackForm[0][3] * newEquation[5],  slackForm[0][6] + slackForm[0][3] * newEquation[6]], # calories equation
+                                [slackForm[1][0] + slackForm[1][3] * newEquation[0], slackForm[1][1] + slackForm[1][3] * newEquation[1], slackForm[1][3] + slackForm[1][3] * newEquation[2], 0,  slackForm[1][4] + slackForm[1][3] * newEquation[4],  slackForm[1][5] + slackForm[1][3] * newEquation[5],  slackForm[1][6] + slackForm[1][3] * newEquation[6]], # fat equation
+                                [slackForm[2][0] + slackForm[2][3] * newEquation[0], slackForm[2][1] + slackForm[2][3] * newEquation[1], slackForm[2][3] + slackForm[2][3] * newEquation[2], 0,  slackForm[2][4] + slackForm[2][3] * newEquation[4],  slackForm[2][5] + slackForm[2][3] * newEquation[5],  slackForm[2][6] + slackForm[2][3] * newEquation[6]]] # cost equation
 
-            slackForm[tightestConstraintEquation][3] *= -1 # when we rearrange, we need to multiply by -1 because we're "moving to the other side"
-            # since the tighest constraint here was protein (equation 2), 30/17 = 1.7647, we rearrange e and a in the format a = constant - b - c - e
-            newEquation = [slackForm[tightestConstraintEquation][0] / slackForm[tightestConstraintEquation][3], # constant
-                        slackForm[tightestConstraintEquation][1] / slackForm[tightestConstraintEquation][3], # a
-                        slackForm[tightestConstraintEquation][2] / slackForm[tightestConstraintEquation][3], # b
-                        1,                                                                                   # c
-                        slackForm[tightestConstraintEquation][4] / slackForm[tightestConstraintEquation][3], # d
-                        slackForm[tightestConstraintEquation][5] / slackForm[tightestConstraintEquation][3], # e 
-                        slackForm[tightestConstraintEquation][6] / slackForm[tightestConstraintEquation][3]] # f
-            # print("The rearranged equation is:", newEquation) # this is the rearranged equation
+                slackForm2[tightestConstraintEquation] = newEquation
+                slackForm2[tightestConstraintEquation][3] = -1
 
-            slackForm2 = [  [slackForm[0][0] + slackForm[0][3] * newEquation[0], slackForm[0][1] + slackForm[0][3] * newEquation[1], slackForm[0][3] + slackForm[0][3] * newEquation[2], 0,  slackForm[0][4] + slackForm[0][3] * newEquation[4],  slackForm[0][5] + slackForm[0][3] * newEquation[5],  slackForm[0][6] + slackForm[0][3] * newEquation[6]], # calories equation
-                            [slackForm[1][0] + slackForm[1][3] * newEquation[0], slackForm[1][1] + slackForm[1][3] * newEquation[1], slackForm[1][3] + slackForm[1][3] * newEquation[2], 0,  slackForm[1][4] + slackForm[1][3] * newEquation[4],  slackForm[1][5] + slackForm[1][3] * newEquation[5],  slackForm[1][6] + slackForm[1][3] * newEquation[6]], # fat equation
-                            [slackForm[2][0] + slackForm[2][3] * newEquation[0], slackForm[2][1] + slackForm[2][3] * newEquation[1], slackForm[2][3] + slackForm[2][3] * newEquation[2], 0,  slackForm[2][4] + slackForm[2][3] * newEquation[4],  slackForm[2][5] + slackForm[2][3] * newEquation[5],  slackForm[2][6] + slackForm[2][3] * newEquation[6]], # protein equation
-                            [slackForm[3][0] + slackForm[3][3] * newEquation[0], slackForm[3][1] + slackForm[3][3] * newEquation[1], slackForm[3][3] + slackForm[3][3] * newEquation[2], 0,  slackForm[3][4] + slackForm[3][3] * newEquation[4],  slackForm[3][5] + slackForm[3][3] * newEquation[5],  slackForm[3][6] + slackForm[3][3] * newEquation[6]]] # cost equation
+                # print(slackForm2[0])
+                # print(slackForm2[1])
+                # print(slackForm2[2])
+                # print(slackForm2[3])
+                slackForm = slackForm2
+                solution[0] = slackForm[tightestConstraintA][0]
+                if tightestConstraintB != None:
+                    solution[1] = slackForm[tightestConstraintB][0]
+                if tightestConstraintC != None:
+                    solution[2] = slackForm[tightestConstraintEquation][0]
+                # print(slackForm)
+                if tightestConstraintC == tightestConstraintA: solution[0] = 0
+                if tightestConstraintC == tightestConstraintB: solution[1] = 0
+                if tightestConstraintB == tightestConstraintA: solution[0] = 0
 
-            slackForm2[tightestConstraintEquation] = newEquation
-            slackForm2[tightestConstraintEquation][3] = -1
-
-            # print(slackForm2[0])
-            # print(slackForm2[1])
-            # print(slackForm2[2])
-            # print(slackForm2[3])
-            slackForm = slackForm2
-            solution[0] = slackForm[tightestConstraintA][0]
-            if tightestConstraintB != None:
-                solution[1] = slackForm[tightestConstraintB][0]
-            if tightestConstraintC != None:
-                solution[2] = slackForm[tightestConstraintEquation][0]
-            # print(slackForm)
-            if tightestConstraintC == tightestConstraintA: solution[0] = 0
-            if tightestConstraintC == tightestConstraintB: solution[1] = 0
-
-        totalCalories = slackForm[0][0]
-        McDonalds.solution = solution
-        # print("FINAL SOLUTION:", solution)
-        # print("TOTAL CALORIES:", totalCalories)
-
+            totalCalories = slackForm[0][0]
+            McDonalds.solution = solution
+            # print("FINAL SOLUTION:", solution)
+            # print("TOTAL CALORIES:", totalCalories)
     def getCachedPhotoImage(mode, image):
         # stores a cached version of the PhotoImage in the PIL/Pillow image
         if ('cachedPhotoImage' not in image.__dict__):
@@ -927,9 +1357,14 @@ class McDonalds(PuzzleMode2):
         # CITATION: https://www.chick-fil-a.com/about/who-we-are#:~:text=%E2%80%9CTo%20glorify%20God%20by%20being,Chick%2Dfil%2DA.%E2%80%9D
         canvas.create_text(mode.width/2, 25, text="McDonald's Menu", font='Calibri 20 bold') # restaurant name
         canvas.create_text(mode.width/2, 50, text="\"I'm Lovin' It\"", font='Calibri 7 bold') # slogan
-        canvas.create_text(mode.width/2, 75, text=f'Objective: maximize total calories, get <={mode.totalFat}g of fat, get <={mode.totalProtein}g of protein, and spend <= ${mode.totalCost}!')
-        # canvas.create_text(mode.width/2, 100, text=f'Current Input Results: {mode.userCalories} calories, {mode.userFat}g of fat, {mode.userProtein}g of protein, for ${mode.userCost}')
-        canvas.create_text(mode.width/2, 100, text='Current Input Results: %0.4f calories, %0.4fg of fat, %0.4fg of protein, for $%0.2f' % (mode.userCalories, mode.userFat, mode.userProtein, mode.userCost))
+        if mode.num_vars == 3:
+            canvas.create_text(mode.width/2, 75, text=f'Objective: maximize total calories, get <={mode.totalFat}g of fat, get <={mode.totalProtein}g of protein, and spend <= ${mode.totalCost}!')
+            # canvas.create_text(mode.width/2, 100, text=f'Current Input Results: {mode.userCalories} calories, {mode.userFat}g of fat, {mode.userProtein}g of protein, for ${mode.userCost}')
+            canvas.create_text(mode.width/2, 100, text='Current Input Results: %0.2f calories, %0.2fg of fat, %0.2fg of protein, for $%0.2f' % (mode.userCalories, mode.userFat, mode.userProtein, mode.userCost))
+        elif mode.num_vars == 2:
+            canvas.create_text(mode.width/2, 75, text=f'Objective: maximize total calories, get <={mode.totalFat}g of fat, and spend <= ${mode.totalCost}!')
+            # canvas.create_text(mode.width/2, 100, text=f'Current Input Results: {mode.userCalories} calories, {mode.userFat}g of fat, {mode.userProtein}g of protein, for ${mode.userCost}')
+            canvas.create_text(mode.width/2, 100, text='Current Input Results: %0.2f calories, %0.2fg of fat, for $%0.2f' % (mode.userCalories, mode.userFat, mode.userCost))
         mode.displayFoods(canvas)
         solutiontoggle = 'See Solution'
         if mode.showsolution:
