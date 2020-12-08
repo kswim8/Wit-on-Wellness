@@ -26,7 +26,7 @@ random            : module for creating pseudo-random number generators
 requests          : module for sending HTTP requests to the API to pull data
 bs4               : module for webscraping and collecting images
 json              : module for parsing JSON into Python dictionaries
-nltk              : module for working with human language data, specifically a food corpus
+nltk              : module for working with human language data, specifically Brown and food corpora
 ```
 
 
