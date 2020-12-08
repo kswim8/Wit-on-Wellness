@@ -1,3 +1,5 @@
+# CITATION: https://www.geeksforgeeks.org/trie-insert-and-search/
+
 # Python program for insert and search 
 # operation in a Trie 
 

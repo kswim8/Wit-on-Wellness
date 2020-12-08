@@ -390,51 +390,51 @@ class SandboxMode(Mode):
             # if there are no search results, print this and repeat
             if len(foodset) == 0:
                 # CITATION: https://stackoverflow.com/questions/19626737/where-can-i-find-a-text-list-or-library-that-contains-a-list-of-common-foods
+                # using the corpus for food to get autocompletion results
                 food = wn.synset('food.n.02')
                 foodcorpus = (set([w for s in food.closure(lambda s:s.hyponyms()) for w in s.lemma_names()]))
+                # CITATION: https://stackoverflow.com/questions/7764229/sort-words-by-their-usage
+                # using the brown corpus to find the popularity/usage of a word to sort the autocompletion results
                 freqs = nltk.FreqDist(w.lower() for w in brown.words()) # how the frequencies are calculated
                 mode.matchingFoodsList = []
                 mode.autocompleteresultscounter = 18.75
-                # print(foodcorpus)
                 try:
                     for thefoods in foodcorpus:
                         if thefoods.startswith(userinput):
-                            thefoods = thefoods.replace('_', ' ')
-                            mode.matchingFoodsList.append([thefoods, freqs[thefoods]]) 
+                            thefoods = thefoods.replace('_', ' ') # the foods have underscores, which make it hard to feed back into API so replace
+                            mode.matchingFoodsList.append([thefoods, freqs[thefoods]]) # each food is a list of [name, frequency]
                         if len(mode.matchingFoodsList) >= 20:
                             break 
                     mode.matchingFoodsList2 = []
                     # CITATION: https://stackoverflow.com/questions/10695139/sort-a-list-of-tuples-by-2nd-item-integer-value
+                    # the scoring by popularity is done here, where it sorts from least to greatest
                     mode.matchingFoodsList = sorted(mode.matchingFoodsList, key=lambda x: x[1]) # this is the line where the scoring is sorted
 
-                    for item in reversed(mode.matchingFoodsList):
+                    # since least to greatest, it needs to be reversed
+                    for item in reversed(mode.matchingFoodsList): 
                         mode.matchingFoodsList2.append(item)
                     
                     mode.matchingFoodsList = mode.matchingFoodsList2
 
-                    print(mode.matchingFoodsList)
+                    # print(mode.matchingFoodsList)
 
+                    # embedding the coordinates for the autocomplete
                     for i in range(len(mode.matchingFoodsList)):
                         mode.matchingFoodsList[i].append(mode.autocompleteresultscounter)
                         mode.autocompleteresultscounter += 37.5
 
-                    print(mode.matchingFoodsList)
-                    # print(mode.matchingFoodsList)
                     mode.autocompletionResults = True
                     mode.displayAutoCompletion(canvas)
                 except:
+                    # displaying autocompletion results if there is a returned list
                     if len(mode.matchingFoodsList) > 0: 
                         mode.app.showMessage(f"Could not find a food or drink labeled {userinput}, please try one of the autocompletions.")
+                    # no matches, not even with autocomplete
                     else:
                         mode.app.showMessage(f"Could not find a food or drink labeled {userinput}, please try a different query.")
 
-            # if len(foodset) == 0:
-                # mode.app.showMessage(f"Could not find a food or drink labeled {userinput}, please try again.")
-            # otherwise, there's probably some single or <10 elements
-
-        # print(mode.foodFullDict)
         # CITATION: https://stackoverflow.com/questions/21530274/format-for-a-url-that-goes-to-google-image-search
-        # web scrape for the image
+        # web scrape for the image from google images
         mode.picCy = 25 # embed the locations of where they will be placed using mode.picCy
         for foodname in foodset:
             try:
@@ -442,8 +442,8 @@ class SandboxMode(Mode):
                 # To explain this part of the code, I webscrape from Google Images and take the first image every time for each listed food returned by the API (in foodset)
                 imagerequest = requests.get(f'https://www.google.com/search?tbm=isch&q={foodname}%20food%20or%20drink')
                 soup = bs4.BeautifulSoup(imagerequest.text, 'html.parser')
-                firstimage = soup.find_all("img")[1]
-                firstimage = str(firstimage)
+                firstimage = soup.find_all("img")[1]    # i put this somewhere else too, but this is the first image on google (0 index is google logo)
+                firstimage = str(firstimage)            # type cast to string for easier parsing, since it's an html tag when using bs4
                 srcindex = firstimage.find('http')      # parsing for start of link
                 foodimageurl = firstimage[srcindex:-3]  # slicing for url of image   
                 # print("THE DICT:", mode.foodFullDict[foodname])
@@ -829,24 +829,16 @@ class Results(SandboxMode):
         canvas.create_text(380, 630, text='TDEE: %0.2f calories' % SandboxMode.userTDEE, font='Calibri 12 bold', anchor='w') # tdee
         # CITATION: https://tdeecalculator.net/ (What is TDEE?)
         canvas.create_text(380, 685, text='TDEE (Total daily energy expenditure):\nhow many calories you are expected to burn.\nUsing this value, we can find how many more\nor less calories should be consumed to\ngain or lose weight. ', anchor='w')
-        
-        # canvas.create_text(380, 615, text='Expected Carbs: %0.2f' % (SandboxMode.userTDEE * 4), font='Calibri 10', anchor='w') # expected carbs
-        # canvas.create_text(380, 630, text='Expected Protein: %0.2f' % (SandboxMode.totalProtein * 4), font='Calibri 10', anchor='w') # expected protein
-        # canvas.create_text(380, 645, text='Expected Fat: %0.2f' % (SandboxMode.totalFat * 9), font='Calibri 10', anchor='w') # expected fat
-
-        # canvas.create_text(380, 680, text='Calories: %0.2f' % SandboxMode.totalCalories, font='Calibri 10', anchor='w') # current cals
-        # canvas.create_text(380, 695, text='Current Carbs: %0.2f' % (SandboxMode.totalCarbs * 4), font='Calibri 10', anchor='w') # current carbs
-        # canvas.create_text(380, 710, text='Current Protein: %0.2f' % (SandboxMode.totalProtein * 4), font='Calibri 10', anchor='w') # current protein
-        # canvas.create_text(380, 725, text='Current Fat: %0.2f' % (SandboxMode.totalFat * 9), font='Calibri 10', anchor='w') # current fat
     
     def redrawAll(mode, canvas):
         canvas.create_rectangle(0, 0, mode.width, 40, fill='cyan')
         canvas.create_text(mode.width/2, 20, text='Results', font='Calibri 15 bold')
+        # if there is not enough data to work with, then no results
         if SandboxMode.totalCalories == 0 or SandboxMode.userCurrentWeight == None:
             canvas.create_text(mode.width/2, mode.height/2, text='No results to show.', font='Calibri 15 bold')
             canvas.create_rectangle(mode.width/2 - 100, mode.height/2 + 150, mode.width/2 + 100, mode.height/2 + 250, fill='cyan')
             canvas.create_text(mode.width/2, mode.height/2 + 200, text='Go Back to Sandbox', font='Calibri 15 bold')
-
+        # enough data, report results through visuals and such
         else:
             canvas.create_line(mode.width/2, 40, mode.width/2, mode.height)
             mode.findProportions()

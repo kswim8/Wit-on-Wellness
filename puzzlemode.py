@@ -10,7 +10,8 @@ import random, requests, bs4, json
 
 class PuzzleMode(Mode):
     def appStarted(mode):
-        mode.puzzle1 = False
+        # these are the booleans for the mousemoved method to show the text
+        mode.puzzle1 = False 
         mode.puzzle2 = False
         # mode.puzzle1loadingmessage = False
 
@@ -59,13 +60,13 @@ class PuzzleMode(Mode):
 
 # Puzzle 1: Highest Calorie Food
 class PuzzleMode1(PuzzleMode):
-    randomizedFoodList = []
-    doOnceCounter = 0
-    calorieCounts = []
-    selectedItem = None
-    foodselected = False
-    answerBoxColor = 'yellow'
-    answerResponse = False
+    randomizedFoodList = []     # a list of the food options to be selected
+    doOnceCounter = 0           # this counter is to ensure redraw all doesn't keep drawing new generations of puzzles on top of one another
+    calorieCounts = []          # a list of the calorie counts
+    selectedItem = None         # variable for name of item selected
+    foodselected = False        # boolean for whether user has selected food
+    answerBoxColor = 'yellow'   # default color for the answer box
+    answerResponse = False      # boolean for whether user has checked answer
 
     def appStarted(mode):
         pass
@@ -76,7 +77,6 @@ class PuzzleMode1(PuzzleMode):
     
     def mousePressed(mode, event):
         if (575 <= event.x <= 650):
-            # CITATION: https://stackoverflow.com/questions/8023306/get-key-by-value-in-dictionary
             if (120 <= event.y <= 135): # 100
                 PuzzleMode1.selectedItem = PuzzleMode1.randomizedFoodList[0][0]
                 mode.foodselected = True
@@ -105,12 +105,13 @@ class PuzzleMode1(PuzzleMode):
             PuzzleMode1.answerResponse = False
         if (550 <= event.x <= 650) and (700 <= event.y <= 750): # 550, 700, 650, 750
             PuzzleMode1.answerResponse = True
-            # print(PuzzleMode1.randomizedFoodList)
+            # if the user gets the right answer, the answer box turns green
             if PuzzleMode1.selectedItem == PuzzleMode1.randomizedFoodList[mode.highestCalorieFood][0]:
                 PuzzleMode1.answerBoxColor = 'green'
             else:
                 PuzzleMode1.answerBoxColor = 'red'
 
+        # generating a new puzzle
         if (400 <= event.x <= 500) and (700 <= event.y <= 750): # 400, 700, 500, 750
             PuzzleMode1.randomizedFoodList = []
             PuzzleMode1.calorieCounts = []
@@ -118,6 +119,7 @@ class PuzzleMode1(PuzzleMode):
             PuzzleMode1.answerBoxColor = 'yellow'
             PuzzleMode1.answerResponse = False
 
+    # CITATION: at the top of the file
     def getCachedPhotoImage(mode, image):
         # stores a cached version of the PhotoImage in the PIL/Pillow image
         if ('cachedPhotoImage' not in image.__dict__):
@@ -149,25 +151,19 @@ class PuzzleMode1(PuzzleMode):
             mode.randomFoods = ['apple', 'orange', 'cheerios', 'chicken', 'nuts', 'fruit', 'turkey', 'yogurt']
             picCy = 100
             for userinput in mode.randomFoods:
-                mode.getFoodDict(userinput)
-                randomfood = random.choice(list(mode.foodFullDict))
+                mode.getFoodDict(userinput)                                                     # get the food dict
+                randomfood = random.choice(list(mode.foodFullDict))                             # picking a random key from dictionary of food
                 randomfoodinfo = mode.foodFullDict[randomfood]
-                PuzzleMode1.randomizedFoodList.append([randomfood, randomfoodinfo, picCy])
-                PuzzleMode1.calorieCounts.append(randomfoodinfo[0][3])
+                PuzzleMode1.randomizedFoodList.append([randomfood, randomfoodinfo, picCy])      # final list of foods will have the food name, food info, and the coordinate
+                PuzzleMode1.calorieCounts.append(randomfoodinfo[0][3])                          # tracking the calories with one list
                 picCy += 75
-                # print(randomfood)
             PuzzleMode1.doOnceCounter = 1
-            # print(PuzzleMode1.randomizedFoodList)
-            # print(PuzzleMode1.calorieCounts)
-            # print(max(PuzzleMode1.calorieCounts))
-            mode.highestCalorieFood = (PuzzleMode1.calorieCounts.index(max(PuzzleMode1.calorieCounts)))
-            # print(mode.highestCalorieFood)
-            # print(mode.highestCalorieFood)
-            # print(PuzzleMode1.randomizedFoodList[mode.highestCalorieFood][0])
+            mode.highestCalorieFood = (PuzzleMode1.calorieCounts.index(max(PuzzleMode1.calorieCounts)))     # finding the max / the answer
+
     
     def getFoodDict(mode, userinput):
         # CITATION: https://github.com/USDA/USDA-APIs/issues/64
-        # pulling food data from the API
+        # pulling food data from the API with a POST request
         params = {'api_key': 'xva7eCmcY6On4IRr0o28hpJJLJpQXC1nYebWx4Wa'}
         data = {'generalSearchInput': userinput}
         response = requests.post(
@@ -217,8 +213,8 @@ class PuzzleMode1(PuzzleMode):
             # that the image that appears for each food is a result of the first image on Google Images.
             imagerequest = requests.get(f'https://www.google.com/search?tbm=isch&q={foodname}%20food%20or%20drink')
             soup = bs4.BeautifulSoup(imagerequest.text, 'html.parser')
-            firstimage = soup.find_all("img")[1]
-            firstimage = str(firstimage)
+            firstimage = soup.find_all("img")[1]    # only get the first image on google (index 0 is the Google logo)
+            firstimage = str(firstimage)            # typecast to a string for easy parsing
             srcindex = firstimage.find('http')      # parsing for start of link
             foodimageurl = firstimage[srcindex:-3]  # slicing for url of image   
             mode.foodFullDict[foodname] = [mode.foodFullDict[foodname], firstimage[srcindex:-3], picCy] # assign value to key
@@ -235,8 +231,8 @@ class PuzzleMode1(PuzzleMode):
         canvas.create_rectangle(400, 700, 500, 750, fill='cyan') # reset/new puzzle button
         canvas.create_text(450, 725, text='New Puzzle', font='Calibri 12 bold')
         canvas.create_rectangle(0, 75, 200, 750, fill=PuzzleMode1.answerBoxColor)
-        mode.getFood()
-        mode.displayFoods(canvas)
+        mode.getFood()      # function that gets the randomly generated foods
+        mode.displayFoods(canvas) # draws the foods
         if mode.foodselected:
             canvas.create_text(10, mode.height/2 - 100, text='Selected Answer:', font='Calibri 15', anchor='w')
             canvas.create_text(10, mode.height/2 - 80, text=f'{PuzzleMode1.selectedItem[:20]}', font='Calibri 15 bold', anchor='w')
@@ -249,7 +245,7 @@ class PuzzleMode1(PuzzleMode):
 # Puzzle 2: Food Choice Optimization (LINEAR PROGRAMMING)
 class PuzzleMode2(PuzzleMode):
     def appStarted(mode):
-        url = 'https://i.pinimg.com/originals/fe/f7/2f/fef72f73f4f961b4ed6f8e4bb093eb1b.jpg'
+        url = 'https://i.pinimg.com/originals/fe/f7/2f/fef72f73f4f961b4ed6f8e4bb093eb1b.jpg' # CITATION: the same background image i've been using, at this link
         mode.appIcon = mode.loadImage(url)
         mode.appIcon2 = mode.scaleImage(mode.appIcon, 4.5/10)
         filename1 = 'chickfilalogo.png' # CITATION: https://myareanetwork-photos.s3.amazonaws.com/bizlist_photos/t/268981_1526986225.png
@@ -286,6 +282,7 @@ class PuzzleMode2(PuzzleMode):
         canvas.create_text(3*mode.width/4, 685, text="Use McDonald's Menu", font='Calibri 15 bold')
 
 # Plan moving forward:
+# INSPIRATION AND CITATION FOR SIMPLEX LEARNING: https://youtu.be/RO5477EKlXE
 '''
 1.  Puzzle Objective: Maximize calories, while having constraints on cost, certain macro/micro nutrients, and amounts.
 2.  Puzzle Objective: Solve for quantities of foods
@@ -751,7 +748,7 @@ class ChickFilA(PuzzleMode2):
             mode.fatDifference = ChickFilA.solution[0] - mode.food1Quantity
             mode.proteinDifference = ChickFilA.solution[1] - mode.food2Quantity
             mode.costDifference = ChickFilA.solution[2] - mode.food3Quantity
-            # print("Differences:", mode.fatDifference, mode.proteinDifference, mode.costDifference)
+            # CITATION: https://www.statisticshowto.com/mean-squared-error/
             mode.mean_squared_error = (mode.fatDifference**2 + mode.proteinDifference**2 + mode.costDifference**2) / 3
             # print("SOLUTION:", ChickFilA.solution)
             # print("THE MSE IS:", mode.mean_squared_error)
@@ -844,6 +841,7 @@ class ChickFilA(PuzzleMode2):
         canvas.create_text(550, 535, text='Current Quantity: %0.4f' % mode.food3Quantity, font='Calibri 10')
         canvas.create_rectangle(mode.width/2 - 100, mode.height - 50, mode.width/2 + 100, mode.height, fill='cyan')
         canvas.create_text(mode.width/2, 725, text='Check Answer', font='Calibri 10')
+        # CITATION: https://www.statisticshowto.com/mean-squared-error/
         canvas.create_text(mode.width/2, 650, text='Mean-Squared Error (how far you are from the optimized solution, 0 is the best score!): %0.4f' % mode.mean_squared_error, font='Calibri 11 bold')
         if mode.mean_squared_error <= 10**(-5): canvas.create_text(mode.width/2 + 160, 725, text='You got it!')
 
@@ -1294,7 +1292,7 @@ class McDonalds(PuzzleMode2):
             mode.fatDifference = McDonalds.solution[0] - mode.food1Quantity
             mode.proteinDifference = McDonalds.solution[1] - mode.food2Quantity
             mode.costDifference = McDonalds.solution[2] - mode.food3Quantity
-            # print("Differences:", mode.fatDifference, mode.proteinDifference, mode.costDifference)
+            # CITATION: https://www.statisticshowto.com/mean-squared-error/
             mode.mean_squared_error = (mode.fatDifference**2 + mode.proteinDifference**2 + mode.costDifference**2) / 3
             # print("SOLUTION:", McDonalds.solution)
             # print("THE MSE IS:", mode.mean_squared_error)
@@ -1387,5 +1385,6 @@ class McDonalds(PuzzleMode2):
         canvas.create_text(550, 535, text='Current Quantity: %0.4f' % mode.food3Quantity, font='Calibri 10')
         canvas.create_rectangle(mode.width/2 - 100, mode.height - 50, mode.width/2 + 100, mode.height, fill='cyan')
         canvas.create_text(mode.width/2, 725, text='Check Answer', font='Calibri 10')
+        # CITATION: https://www.statisticshowto.com/mean-squared-error/
         canvas.create_text(mode.width/2, 650, text='Mean-Squared Error (how far you are from the optimized solution, 0 is the best score!): %0.4f' % mode.mean_squared_error, font='Calibri 11 bold')
         if mode.mean_squared_error <= 10**(-5): canvas.create_text(mode.width/2 + 160, 725, text='You got it!')

@@ -10,10 +10,10 @@ class Instructions(Mode):
         url = 'https://i.pinimg.com/originals/fe/f7/2f/fef72f73f4f961b4ed6f8e4bb093eb1b.jpg' # CITATION: This link leads to the background picture I used.
         mode.appIcon = mode.loadImage(url)
         mode.appIcon2 = mode.scaleImage(mode.appIcon, 4.5/10)
-        filename1 = 'sandboxmodepic.png'
+        filename1 = 'sandboxmodepic.png' # This picture was made on my own, it's a picture of my app
         mode.sandboxImage = mode.loadImage(filename1)
         mode.sandboxImage2 = mode.scaleImage(mode.sandboxImage, 0.45)
-        filename2 = 'puzzlemodepic.png'
+        filename2 = 'puzzlemodepic.png' # This picture was made on my own, it's a picture of my app
         mode.puzzleImage = mode.loadImage(filename2)
         mode.puzzleImage2 = mode.scaleImage(mode.puzzleImage, 0.45)
 
