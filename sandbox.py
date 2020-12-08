@@ -6,7 +6,9 @@
 # CITATION: https://www.cs.cmu.edu/~112/notes/notes-animations-part3.html#cachingPhotoImages
 from cmu_112_graphics import *
 import random, requests, bs4, json, nltk
+nltk.download('brown')
 from nltk.corpus import wordnet as wn
+from nltk.corpus import brown
 
 class SandboxMode(Mode):
     totalCarbs = 0
@@ -339,8 +341,8 @@ class SandboxMode(Mode):
 
     def displayAutoCompletion(mode, canvas):
         for i in range(len(mode.matchingFoodsList)):
-            canvas.create_text(mode.width/2, mode.matchingFoodsList[i][1], text=mode.matchingFoodsList[i][0], anchor='w')
-            canvas.create_line(200, mode.matchingFoodsList[i][1] + 18.75, mode.width, mode.matchingFoodsList[i][1] + 18.75)
+            canvas.create_text(mode.width/2, mode.matchingFoodsList[i][2], text=mode.matchingFoodsList[i][0], anchor='w')
+            canvas.create_line(200, mode.matchingFoodsList[i][2] + 18.75, mode.width, mode.matchingFoodsList[i][2] + 18.75)
 
     def getFoodDict(mode, userinput):
         # CITATION: https://github.com/USDA/USDA-APIs/issues/64
@@ -390,18 +392,33 @@ class SandboxMode(Mode):
                 # CITATION: https://stackoverflow.com/questions/19626737/where-can-i-find-a-text-list-or-library-that-contains-a-list-of-common-foods
                 food = wn.synset('food.n.02')
                 foodcorpus = (set([w for s in food.closure(lambda s:s.hyponyms()) for w in s.lemma_names()]))
+                freqs = nltk.FreqDist(w.lower() for w in brown.words()) # how the frequencies are calculated
                 mode.matchingFoodsList = []
                 mode.autocompleteresultscounter = 18.75
-                print(foodcorpus)
+                # print(foodcorpus)
                 try:
                     for thefoods in foodcorpus:
                         if thefoods.startswith(userinput):
                             thefoods = thefoods.replace('_', ' ')
-                            mode.matchingFoodsList.append((thefoods, mode.autocompleteresultscounter))
-                            mode.autocompleteresultscounter += 37.5
+                            mode.matchingFoodsList.append([thefoods, freqs[thefoods]]) 
                         if len(mode.matchingFoodsList) >= 20:
                             break 
-                        
+                    mode.matchingFoodsList2 = []
+                    # CITATION: https://stackoverflow.com/questions/10695139/sort-a-list-of-tuples-by-2nd-item-integer-value
+                    mode.matchingFoodsList = sorted(mode.matchingFoodsList, key=lambda x: x[1]) # this is the line where the scoring is sorted
+
+                    for item in reversed(mode.matchingFoodsList):
+                        mode.matchingFoodsList2.append(item)
+                    
+                    mode.matchingFoodsList = mode.matchingFoodsList2
+
+                    print(mode.matchingFoodsList)
+
+                    for i in range(len(mode.matchingFoodsList)):
+                        mode.matchingFoodsList[i].append(mode.autocompleteresultscounter)
+                        mode.autocompleteresultscounter += 37.5
+
+                    print(mode.matchingFoodsList)
                     # print(mode.matchingFoodsList)
                     mode.autocompletionResults = True
                     mode.displayAutoCompletion(canvas)

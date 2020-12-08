@@ -18,11 +18,22 @@ matchingFoodsList = []
 userinput = input("Enter a food/drink: ")
 try:
     for aFood in foodcorpus:
+        aFood = aFood.replace('_',' ')
         if aFood.startswith(userinput):
-            matchingFoodsList.append(aFood)
+            matchingFoodsList.append((aFood, freqs[aFood]))
+            
         if len(matchingFoodsList) >= 20:
             break 
 except:
     print("Nothing found")
 
 print(matchingFoodsList)
+
+superFinalList = []
+finalList = sorted(matchingFoodsList, key=lambda x: x[1])
+
+for item in reversed(finalList):
+    superFinalList.append(item)
+
+print("FINAL LIST:", finalList)
+print("SUPER FINAL FINAL FINAL LIST:", superFinalList)
