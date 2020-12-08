@@ -28,6 +28,8 @@ class SplashScreenMode(Mode):
         # clicking Credits box
         elif ((3*mode.width/4-50) <= event.x <= (3*mode.width/4+100)) and ((3*mode.height/4) <= event.y <= (3*mode.height/4+50)):
             mode.app.setActiveMode(mode.app.credits)
+        # elif ((mode.width/2-75) <= event.x <= (mode.width/2+75)) and ((9*mode.height/10) <= event.y <= (9*mode.height/10+50)):
+            # mode.app.setActiveMode(mode.app.aiChatbot)
 
     def redrawAll(mode, canvas):
         canvas.create_image(mode.width/2, mode.height/2, image=ImageTk.PhotoImage(mode.appIcon2))
@@ -45,3 +47,6 @@ class SplashScreenMode(Mode):
         # Credits (bottom right box)
         canvas.create_rectangle(3*mode.width/4-50, 3*mode.height/4, 3*mode.width/4+100, 3*mode.height/4+50, fill='white')
         canvas.create_text(3*mode.width/4+25, 3*mode.height/4+25, text='Credits', font='Calibri 15 bold')
+        # AI Chatbot
+        # canvas.create_rectangle(mode.width/2-75, 9*mode.height/10, mode.width/2+75, 9*mode.height/10+50, fill='white')
+        # canvas.create_text(mode.width/2, 9*mode.height/10+25, text='AI Chatbot', font='Calibri 15 bold')

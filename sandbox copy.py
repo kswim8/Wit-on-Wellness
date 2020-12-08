@@ -5,8 +5,7 @@
 # CITATION: https://www.cs.cmu.edu/~112/notes/notes-animations-part3.html#subclassingModalApp 
 # CITATION: https://www.cs.cmu.edu/~112/notes/notes-animations-part3.html#cachingPhotoImages
 from cmu_112_graphics import *
-import random, requests, bs4, json, nltk
-from nltk.corpus import wordnet as wn
+import random, requests, bs4, json
 
 class SandboxMode(Mode):
     totalCarbs = 0
@@ -29,8 +28,6 @@ class SandboxMode(Mode):
         mode.userfoodcounter = 0
         mode.userGender = mode.userAge = mode.userHeight = mode.userWeight = mode.userLevelOfActivity = mode.userGoal = mode.userTime = mode.userGoal2 = None
         mode.importedData = False
-        mode.exportedData = False
-        mode.autocompletionResults = False
 
     def takeUserInputData(mode):
         # CITATION: https://steelfitusa.com/2018/10/calculate-tdee/
@@ -170,7 +167,6 @@ class SandboxMode(Mode):
                 result = result + "~" + json.dumps(mode.userFoodDict)
             f.write(result)
             print(result)
-            mode.exportedData = True
         else:
             print("Nothing exported.")
             pass
@@ -209,50 +205,40 @@ class SandboxMode(Mode):
             # add to list buttons
             if (mode.foodentered):
                 mode.foodselected = False
-
-                if mode.autocompletionResults:
-                    if (200 <= event.x <= 650):
-                        clickedarea = int(event.y / 37.5)
-                        # print(mode.matchingFoodsList[clickedarea])
-                        # print(type(mode.matchingFoodsList[clickedarea]))
-                        mode.getFoodDict(mode.matchingFoodsList[clickedarea][0])
-                        mode.autocompletionResults = False
-
-                else:
-                    if (575 <= event.x <= 650):
-                        # CITATION: https://stackoverflow.com/questions/8023306/get-key-by-value-in-dictionary
-                        if (45 <= event.y <= 60): # 25
-                            newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(25)]
-                            mode.foodselected = True
-                        elif (120 <= event.y <= 135) and len(mode.foodFullDict) > 1: # 100
-                            newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(100)]
-                            mode.foodselected = True
-                        elif (195 <= event.y <= 210) and len(mode.foodFullDict) > 2: # 175
-                            newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(175)]
-                            mode.foodselected = True
-                        elif (270 <= event.y <= 285) and len(mode.foodFullDict) > 3: # 250
-                            newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(250)]
-                            mode.foodselected = True
-                        elif (345 <= event.y <= 360) and len(mode.foodFullDict) > 4: # 325
-                            newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(325)]
-                            mode.foodselected = True
-                        elif (420 <= event.y <= 435) and len(mode.foodFullDict) > 5: # 400
-                            newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(400)]
-                            mode.foodselected = True
-                        elif (495 <= event.y <= 510) and len(mode.foodFullDict) > 6: # 475
-                            newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(475)]
-                            mode.foodselected = True
-                        elif (570 <= event.y <= 585) and len(mode.foodFullDict) > 7: # 550
-                            newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(550)]
-                            mode.foodselected = True
-                        elif (645 <= event.y <= 660) and len(mode.foodFullDict) > 8: # 625
-                            newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(625)]
-                            mode.foodselected = True
-                        elif (720 <= event.y <= 735) and len(mode.foodFullDict) > 9: # 700
-                            newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(700)]
-                            mode.foodselected = True
-                        if mode.foodselected:
-                            mode.calculateQuantities(newFoodCoord)
+                if (575 <= event.x <= 650):
+                    # CITATION: https://stackoverflow.com/questions/8023306/get-key-by-value-in-dictionary
+                    if (45 <= event.y <= 60): # 25
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(25)]
+                        mode.foodselected = True
+                    elif (120 <= event.y <= 135) and len(mode.foodFullDict) > 1: # 100
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(100)]
+                        mode.foodselected = True
+                    elif (195 <= event.y <= 210) and len(mode.foodFullDict) > 2: # 175
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(175)]
+                        mode.foodselected = True
+                    elif (270 <= event.y <= 285) and len(mode.foodFullDict) > 3: # 250
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(250)]
+                        mode.foodselected = True
+                    elif (345 <= event.y <= 360) and len(mode.foodFullDict) > 4: # 325
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(325)]
+                        mode.foodselected = True
+                    elif (420 <= event.y <= 435) and len(mode.foodFullDict) > 5: # 400
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(400)]
+                        mode.foodselected = True
+                    elif (495 <= event.y <= 510) and len(mode.foodFullDict) > 6: # 475
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(475)]
+                        mode.foodselected = True
+                    elif (570 <= event.y <= 585) and len(mode.foodFullDict) > 7: # 550
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(550)]
+                        mode.foodselected = True
+                    elif (645 <= event.y <= 660) and len(mode.foodFullDict) > 8: # 625
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(625)]
+                        mode.foodselected = True
+                    elif (720 <= event.y <= 735) and len(mode.foodFullDict) > 9: # 700
+                        newFoodCoord = list(mode.foodFullDictCoords.keys())[list(mode.foodFullDictCoords.values()).index(700)]
+                        mode.foodselected = True
+                    if mode.foodselected:
+                        mode.calculateQuantities(newFoodCoord)
 
         elif mode.userList:
             if mode.userFoodDict == {} and (((mode.width/2 - 200) <= event.x <= (mode.width/2 + 200)) and ((mode.height/2 + 100) <= event.y <= (mode.height/2 + 200))): 
@@ -337,11 +323,6 @@ class SandboxMode(Mode):
             # separate foods with lines
             canvas.create_line(0, mode.userFoodDict[foodname][5] + 37.5, mode.width, mode.userFoodDict[foodname][5] + 37.5)
 
-    def displayAutoCompletion(mode, canvas):
-        for i in range(len(mode.matchingFoodsList)):
-            canvas.create_text(mode.width/2, mode.matchingFoodsList[i][1], text=mode.matchingFoodsList[i][0], anchor='w')
-            canvas.create_line(200, mode.matchingFoodsList[i][1] + 18.75, mode.width, mode.matchingFoodsList[i][1] + 18.75)
-
     def getFoodDict(mode, userinput):
         # CITATION: https://github.com/USDA/USDA-APIs/issues/64
         # pulling food data from the API
@@ -352,7 +333,7 @@ class SandboxMode(Mode):
             params = params,
             json = data
         )
-        mode.matchingFoodsList = []
+
         mode.foodentered = True
         mode.foodFullDict = dict()
         mode.foodFullDictCoords = dict()
@@ -363,7 +344,6 @@ class SandboxMode(Mode):
         try:
             while len(foodset) < 10:
                 # get the name of the foods 
-                # print(response.json())
                 foodname = response.json()['foods'][num]['description']
                 foodset.add(foodname)
                 num += 1
@@ -387,35 +367,10 @@ class SandboxMode(Mode):
         except IndexError:
             # if there are no search results, print this and repeat
             if len(foodset) == 0:
-                # CITATION: https://stackoverflow.com/questions/19626737/where-can-i-find-a-text-list-or-library-that-contains-a-list-of-common-foods
-                food = wn.synset('food.n.02')
-                foodcorpus = (set([w for s in food.closure(lambda s:s.hyponyms()) for w in s.lemma_names()]))
-                mode.matchingFoodsList = []
-                mode.autocompleteresultscounter = 18.75
-                print(foodcorpus)
-                try:
-                    for thefoods in foodcorpus:
-                        if thefoods.startswith(userinput):
-                            thefoods = thefoods.replace('_', ' ')
-                            mode.matchingFoodsList.append((thefoods, mode.autocompleteresultscounter))
-                            mode.autocompleteresultscounter += 37.5
-                        if len(mode.matchingFoodsList) >= 20:
-                            break 
-                        
-                    # print(mode.matchingFoodsList)
-                    mode.autocompletionResults = True
-                    mode.displayAutoCompletion(canvas)
-                except:
-                    if len(mode.matchingFoodsList) > 0: 
-                        mode.app.showMessage(f"Could not find a food or drink labeled {userinput}, please try one of the autocompletions.")
-                    else:
-                        mode.app.showMessage(f"Could not find a food or drink labeled {userinput}, please try a different query.")
-
-            # if len(foodset) == 0:
-                # mode.app.showMessage(f"Could not find a food or drink labeled {userinput}, please try again.")
+                mode.app.showMessage(f"Could not find a food or drink labeled {userinput}, please try again.")
             # otherwise, there's probably some single or <10 elements
 
-        # print(mode.foodFullDict)
+        print(mode.foodFullDict)
         # CITATION: https://stackoverflow.com/questions/21530274/format-for-a-url-that-goes-to-google-image-search
         # web scrape for the image
         mode.picCy = 25 # embed the locations of where they will be placed using mode.picCy
@@ -439,7 +394,7 @@ class SandboxMode(Mode):
                 pass 
 
         # print(mode.foodFullDict) # final food dict with macros + image url
-
+    
     def redrawAll(mode, canvas):
         if not mode.userList:
             canvas.create_line(200, 0, 200, mode.height)     
@@ -458,19 +413,8 @@ class SandboxMode(Mode):
             canvas.create_rectangle(0, 625, 200, 750, fill='purple')
             canvas.create_text(100, 687.5, text='View User Profile', font='Calibri 15 bold')  
             
-            if mode.autocompletionResults:
-                mode.displayAutoCompletion(canvas)
-
             mode.displayFoods(canvas)
-            '''
-            if mode.importedData:
-                canvas.create_rectangle()
-                canvas.create_text()
 
-            if mode.exportedData:
-                canvas.create_rectangle()
-                canvas.create_text()
-            '''
             if mode.userProfile:
                 canvas.create_rectangle(205, 475, 525, 745, fill='white', width=5)
                 if mode.userGender != None:

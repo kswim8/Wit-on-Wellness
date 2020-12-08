@@ -8,7 +8,8 @@
 import module_manager
 module_manager.review()
 from cmu_112_graphics import *
-import random, requests, bs4, json
+import random, requests, bs4, json, nltk
+from nltk.corpus import wordnet as wn
 from splashscreen import *
 from instructions import *
 from sandbox import *
@@ -25,6 +26,7 @@ class WitOnWellness(ModalApp):
         app.puzzleMode2 = PuzzleMode2() 
         app.chickfilaMenu = ChickFilA()
         app.mcdonaldsMenu = McDonalds()
+        # app.aiChatbot = AIChatBot()
         app.instructions = Instructions()
         app.credits = Credits()
         app.setActiveMode(app.splashScreenMode)
